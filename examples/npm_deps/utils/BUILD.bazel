@@ -1,0 +1,8 @@
+load("@aspect_rules_sol//sol:defs.bzl", "sol_sources")
+
+sol_sources(
+    name = "utils",
+    srcs = ["OwnerPausable.sol"],
+    visibility = ["//visibility:public"],
+    deps = ["//examples/npm_deps:node_modules/@openzeppelin/contracts"],
+)

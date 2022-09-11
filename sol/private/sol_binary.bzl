@@ -6,6 +6,7 @@ TODO:
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@aspect_rules_js//js:providers.bzl", "JsInfo")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
+load("//sol:providers.bzl", "SolSourcesInfo")
 
 _ATTRS = {
     "srcs": attr.label_list(
@@ -17,8 +18,8 @@ _ATTRS = {
         doc = "Additional command-line arguments to solc. Run solc --help for a listing.",
     ),
     "deps": attr.label_list(
-        doc = "Solidity libraries, typically distributed as packages on npm",
-        providers = [JsInfo],
+        doc = "Solidity libraries, either first-party sol_sources, or third-party distributed as packages on npm",
+        providers = [[SolSourcesInfo], [JsInfo]],
     ),
     "bin": attr.bool(
         doc = "Whether to emit binary of the contracts in hex.",
@@ -40,6 +41,13 @@ def _calculate_outs(ctx):
             result.append(ctx.actions.declare_file(relative_src + "_json.ast"))
     return result
 
+def _gather_transitive_sources(attr):
+    result = []
+    for dep in attr:
+        if SolSourcesInfo in dep:
+            result.append(dep[SolSourcesInfo].transitive_sources)
+    return result
+
 def _run_solc(ctx):
     "Generate action(s) to run the compiler"
     solinfo = ctx.toolchains["@aspect_rules_sol//sol:toolchain_type"].solinfo
@@ -58,16 +66,18 @@ def _run_solc(ctx):
 
     root_packages = []
     for dep in ctx.attr.deps:
-        for pkg in dep[JsInfo].npm_linked_packages.to_list():
-            # Where the node_modules were installed
-            root_packages.append(pkg.store_info.root_package)
+        if JsInfo in dep:
+            for pkg in dep[JsInfo].transitive_npm_linked_packages.to_list():
+                # Where the node_modules were installed
+                root_packages.append(pkg.store_info.root_package)
 
-    args.add("--include-path")
-    args.add_joined(root_packages,
-        format_each = ctx.bin_dir.path + "/%s/node_modules",
-        join_with = ",",
-        uniquify = True,
-    )
+    if len(root_packages):
+        args.add("--include-path")
+        args.add_joined(root_packages,
+            format_each = ctx.bin_dir.path + "/%s/node_modules",
+            join_with = ",",
+            uniquify = True,
+        )
 
     if ctx.attr.bin:
         args.add("--bin")
@@ -107,7 +117,7 @@ while true; do
     [[ "$search" == "/" ]] && break
     if [[ $(basename "$search") == "sandbox" ]]; then
         # Explicitly allow solc to read files in the execroot outside the Bazel sandbox
-        extra_arg="--allow-paths $(dirname $search)"
+        extra_arg="--allow-paths $(pwd),$(dirname $search),/home/alexeagle/Projects/rules_sol/examples/npm_deps/"
     fi
     search="$(dirname "$search")"
 done
@@ -120,7 +130,7 @@ exec {solc} $@ $extra_arg""".format(
     ctx.actions.run(
         executable = shim,
         arguments = [args],
-        inputs = depset(ctx.files.srcs, transitive = [npm_deps]),
+        inputs = depset(ctx.files.srcs, transitive = _gather_transitive_sources(ctx.attr.deps) + [npm_deps]),
         outputs = outputs,
         tools = solinfo.tool_files,
         mnemonic = "Solc",
