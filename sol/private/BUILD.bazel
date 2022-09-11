@@ -16,4 +16,9 @@ bzl_library(
     name = "sol_binary",
     srcs = ["sol_binary.bzl"],
     visibility = ["//sol:__subpackages__"],
+    deps = [
+        "@aspect_rules_js//js:libs",
+        "@aspect_rules_js//js:providers",
+        "@bazel_skylib//lib:paths",
+    ],
 )

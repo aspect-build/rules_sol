@@ -64,7 +64,7 @@ def _run_solc(ctx):
 
     args.add("--include-path")
     args.add_joined(root_packages,
-        format_each = ctx.bin_dir.path + "%s/node_modules",
+        format_each = ctx.bin_dir.path + "/%s/node_modules",
         join_with = ",",
         uniquify = True,
     )
