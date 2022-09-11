@@ -11,3 +11,9 @@ bzl_library(
     srcs = ["versions.bzl"],
     visibility = ["//sol:__subpackages__"],
 )
+
+bzl_library(
+    name = "sol_binary",
+    srcs = ["sol_binary.bzl"],
+    visibility = ["//sol:__subpackages__"],
+)

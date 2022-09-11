@@ -1,3 +1,3 @@
-load(":versions_test.bzl", "versions_test_suite")
+load(":sol_binary_test.bzl", "sol_binary_test_suite")
 
-versions_test_suite(name = "versions_test")
+sol_binary_test_suite(name = "sol_binary_test")

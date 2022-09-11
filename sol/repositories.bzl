@@ -31,6 +31,12 @@ def rules_sol_dependencies():
             "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.2.1/bazel-skylib-1.2.1.tar.gz",
         ],
     )
+    http_archive(
+        name = "aspect_bazel_lib",
+        sha256 = "a7977885ddafca6f4aa87fabcd47dba49ef5e9b513b8b3fa09d5a59606e7e4f0",
+        strip_prefix = "bazel-lib-1.11.4",
+        url = "https://github.com/aspect-build/bazel-lib/archive/refs/tags/v1.11.4.tar.gz",
+    )
 
 ########
 # Remaining content of the file is only used to support toolchains.

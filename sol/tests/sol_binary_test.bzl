@@ -14,5 +14,5 @@ def _smoke_test_impl(ctx):
 # but their names are arbitrary and don't appear anywhere.
 _t0_test = unittest.make(_smoke_test_impl)
 
-def versions_test_suite(name):
+def sol_binary_test_suite(name):
     unittest.suite(name, _t0_test)

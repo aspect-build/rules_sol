@@ -27,6 +27,7 @@ bzl_library(
     name = "defs",
     srcs = ["defs.bzl"],
     visibility = ["//visibility:public"],
+    deps = ["//sol/private:sol_binary"],
 )
 
 bzl_library(
