@@ -37,6 +37,13 @@ def rules_sol_dependencies():
         strip_prefix = "bazel-lib-1.11.4",
         url = "https://github.com/aspect-build/bazel-lib/archive/refs/tags/v1.11.4.tar.gz",
     )
+    http_archive(
+        name = "aspect_rules_js",
+        sha256 = "db9f446752fe4100320cf8487e8fd476b9af0adf6b99b601bcfd70b289bb0598",
+        strip_prefix = "rules_js-1.1.2",
+        url = "https://github.com/aspect-build/rules_js/archive/refs/tags/v1.1.2.tar.gz",
+    )
+
 
 ########
 # Remaining content of the file is only used to support toolchains.
