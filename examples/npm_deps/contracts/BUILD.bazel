@@ -4,4 +4,5 @@ sol_binary(
     name = "contracts",
     srcs = ["Signer.sol"],
     deps = ["//examples/npm_deps/utils"],
+    bin = True,
 )

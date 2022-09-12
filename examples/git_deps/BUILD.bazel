@@ -5,4 +5,5 @@ sol_binary(
     srcs = ["OwnerPausable.sol"],
     # This is defined in /internal_deps.bzl
     deps = ["@openzeppelin-contracts"],
+    combined_json = ["abi", "bin", "hashes"],
 )

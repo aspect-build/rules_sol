@@ -9,6 +9,7 @@ load("@aspect_rules_js//js:providers.bzl", "JsInfo")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
 load("//sol:providers.bzl", "SolSourcesInfo")
 
+_OUTPUT_COMPONENTS = ["abi","asm","ast","bin","bin-runtime","devdoc","function-debug","function-debug-runtime","generated-sources","generated-sources-runtime","hashes","metadata","opcodes","srcmap","srcmap-runtime","storage-layout","userdoc"]
 _ATTRS = {
     "srcs": attr.label_list(
         doc = "Solidity source files",
@@ -24,11 +25,15 @@ _ATTRS = {
     ),
     "bin": attr.bool(
         doc = "Whether to emit binary of the contracts in hex.",
-        default = True,
     ),
     "ast_compact_json": attr.bool(
         doc = "Whether to emit AST of all source files in a compact JSON format.",
-    )
+    ),
+    "combined_json": attr.string_list(
+        doc = """Output a single json document containing the specified information.""",
+        # Thanks bazel... https://github.com/bazelbuild/bazel/issues/6638
+        # values = ,
+    ),
 }
 
 def _calculate_outs(ctx):
@@ -40,6 +45,8 @@ def _calculate_outs(ctx):
             result.append(ctx.actions.declare_file(paths.replace_extension(relative_src, ".bin")))
         if ctx.attr.ast_compact_json:
             result.append(ctx.actions.declare_file(relative_src + "_json.ast"))
+        if len(ctx.attr.combined_json):
+            result.append(ctx.actions.declare_file("combined.json"))
     return result
 
 def _gather_transitive_sources(attr):
@@ -87,8 +94,17 @@ def _run_solc(ctx):
         args.add("--bin")
     if ctx.attr.ast_compact_json:
         args.add("--ast-compact-json")
+    for v in ctx.attr.combined_json:
+        if v not in _OUTPUT_COMPONENTS:
+            fail("Illegal output component {}, must be one of {}".format(v, _OUTPUT_COMPONENTS))
+    if len(ctx.attr.combined_json):
+        args.add("--combined-json")
+        args.add_joined(ctx.attr.combined_json, join_with=",")
 
     outputs = _calculate_outs(ctx)
+    if not len(outputs):
+        fail("No outputs were requested. This is illegal under Bazel, as actions are only run to produce output files.")
+
     npm_deps = js_lib_helpers.gather_files_from_js_providers(ctx.attr.deps, include_transitive_sources = True, include_declarations = False, include_npm_linked_packages = True)
 
     # solc will follow symlinks out of the sandbox, then insist that the execroot path is allowed.
