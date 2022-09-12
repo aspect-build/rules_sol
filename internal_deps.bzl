@@ -73,8 +73,8 @@ def rules_sol_internal_deps():
     # https://book.getfoundry.sh/projects/dependencies
     new_git_repository(
         name = "openzeppelin-contracts",
-        remote = "git@github.com:OpenZeppelin/openzeppelin-contracts.git",
-        commit = "8c49ad74eae76ee389d038780d407cf90b4ae1de", # v4.7.0
+        remote = "https://github.com/OpenZeppelin/openzeppelin-contracts.git",
+        commit = "8c49ad74eae76ee389d038780d407cf90b4ae1de",  # v4.7.0
         shallow_since = "1656493217 +0200",
         build_file_content = """\
 load("@aspect_rules_sol//sol:defs.bzl", "sol_sources")
