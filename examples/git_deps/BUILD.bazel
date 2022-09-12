@@ -1,0 +1,8 @@
+load("@aspect_rules_sol//sol:defs.bzl", "sol_binary")
+
+sol_binary(
+    name = "git_deps",
+    srcs = ["OwnerPausable.sol"],
+    # This is defined in /internal_deps.bzl
+    deps = ["@openzeppelin-contracts"],
+)

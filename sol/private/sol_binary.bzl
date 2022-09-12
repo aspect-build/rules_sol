@@ -3,6 +3,7 @@
 TODO:
 - use `--optimize` if compilation_mode=opt
 """
+load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@aspect_rules_js//js:providers.bzl", "JsInfo")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
@@ -70,6 +71,9 @@ def _run_solc(ctx):
             for pkg in dep[JsInfo].transitive_npm_linked_packages.to_list():
                 # Where the node_modules were installed
                 root_packages.append(pkg.store_info.root_package)
+        if SolSourcesInfo in dep:
+            for prefix, target in dep[SolSourcesInfo].remappings.items():
+                args.add_joined([prefix, target], join_with="=")
 
     if len(root_packages):
         args.add("--include-path")
@@ -98,8 +102,14 @@ def _run_solc(ctx):
     # Anyhow, as very few compilers do such a thing, the solc layer isn't the right place to solve.
     args.add_all(["--allow-paths", "/"])
 
+    # Useful for debugging the rule: wrap it in a shell script.
+    # Can show both the layout of inputs and location of emitted files.
+    #     shim = ctx.actions.declare_file("run.sh")
+    #     ctx.actions.write(shim, """#!/usr/bin/env bash
+    # # ls -R
+    # {} $@""".format(solinfo.target_tool_path), is_executable = True)
     ctx.actions.run(
-        executable = solinfo.target_tool_path,
+        executable = solinfo.target_tool_path, # shim,
         arguments = [args],
         inputs = depset(ctx.files.srcs, transitive = _gather_transitive_sources(ctx.attr.deps) + [npm_deps]),
         outputs = outputs,
