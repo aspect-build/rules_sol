@@ -3,13 +3,13 @@
 TODO:
 - use `--optimize` if compilation_mode=opt
 """
-load("@bazel_skylib//lib:dicts.bzl", "dicts")
+
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@aspect_rules_js//js:providers.bzl", "JsInfo")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
 load("//sol:providers.bzl", "SolSourcesInfo")
 
-_OUTPUT_COMPONENTS = ["abi","asm","ast","bin","bin-runtime","devdoc","function-debug","function-debug-runtime","generated-sources","generated-sources-runtime","hashes","metadata","opcodes","srcmap","srcmap-runtime","storage-layout","userdoc"]
+_OUTPUT_COMPONENTS = ["abi", "asm", "ast", "bin", "bin-runtime", "devdoc", "function-debug", "function-debug-runtime", "generated-sources", "generated-sources-runtime", "hashes", "metadata", "opcodes", "srcmap", "srcmap-runtime", "storage-layout", "userdoc"]
 _ATTRS = {
     "srcs": attr.label_list(
         doc = "Solidity source files",
@@ -64,9 +64,9 @@ def _run_solc(ctx):
 
     # User-provided arguments first, so we can override them
     args.add_all(ctx.attr.args)
-    
+
     args.add_all([s.path for s in ctx.files.srcs])
-    
+
     # TODO: is this the right value? maybe it ought to be the package directory?
     args.add_all(["--base-path", "."])
 
@@ -81,11 +81,12 @@ def _run_solc(ctx):
                 root_packages.append(pkg.store_info.root_package)
         if SolSourcesInfo in dep:
             for prefix, target in dep[SolSourcesInfo].remappings.items():
-                args.add_joined([prefix, target], join_with="=")
+                args.add_joined([prefix, target], join_with = "=")
 
     if len(root_packages):
         args.add("--include-path")
-        args.add_joined(root_packages,
+        args.add_joined(
+            root_packages,
             format_each = ctx.bin_dir.path + "/%s/node_modules",
             join_with = ",",
             uniquify = True,
@@ -100,7 +101,7 @@ def _run_solc(ctx):
             fail("Illegal output component {}, must be one of {}".format(v, _OUTPUT_COMPONENTS))
     if len(ctx.attr.combined_json):
         args.add("--combined-json")
-        args.add_joined(ctx.attr.combined_json, join_with=",")
+        args.add_joined(ctx.attr.combined_json, join_with = ",")
 
     outputs = _calculate_outs(ctx)
     if not len(outputs):
@@ -164,7 +165,7 @@ fi
 
 def _sol_binary_impl(ctx):
     return [
-        DefaultInfo(files = _run_solc(ctx))
+        DefaultInfo(files = _run_solc(ctx)),
     ]
 
 sol_binary = struct(

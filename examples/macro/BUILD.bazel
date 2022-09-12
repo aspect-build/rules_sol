@@ -1,11 +1,10 @@
-load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
-
 """Example of building your own solidity support.
 
 Most users should use the sol_* rules distributed in this module.
 However, by using Bazel's toolchains feature, you can get access to the solidity compiler.
 """
 
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load(":sol.bzl", "my_sol_macro")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 

@@ -8,4 +8,3 @@ SolSourcesInfo = provider(
         "remappings": "dictionary of import remappings to propagate to solc",
     },
 )
-

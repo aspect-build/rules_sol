@@ -44,7 +44,6 @@ def rules_sol_dependencies():
         url = "https://github.com/aspect-build/rules_js/archive/refs/tags/v1.1.2.tar.gz",
     )
 
-
 ########
 # Remaining content of the file is only used to support toolchains.
 ########
