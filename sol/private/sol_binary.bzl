@@ -94,41 +94,12 @@ def _run_solc(ctx):
     # > When a file is a symlink that leads to a file outside of base path or include directories.
     # > The directory containing the symlink target must be in --allowed-directories for this to be allowed.
     #
-    # In theory, we could just pass the flag by adding it to the args here:
-    # args.add_all(["--allow-paths", "/shared/cache/bazel/user_base/4852a32ae4e0a9af81db7a9d3d23d028/execroot"])
-    # However, there's not a way in Bazel to construct such a path out of the sandbox.
-    # An alternative would be to skip sandboxing, like with
-    #  args.add("--overwrite")
-    #  execution_requirements["no-sandbox"] = "1"
-    # but then, we run into a different problem where solc sees the non-sandboxed copy of the dependencies, and fails:
-    # Error: Source "@openzeppelin/contracts/utils/structs/BitMaps.sol" not found: Ambiguous import.
-    # Multiple matching files found inside base path and/or include paths: 
-    # "/shared/cache/bazel/user_base/2a38f4143004a5b13cc7ebd21a4945b4/execroot/__main__/bazel-out/k8-fastbuild/bin/node_modules/.aspect_rules_js/@openzeppelin+contracts@4.7.0/node_modules/@openzeppelin/contracts/utils/structs/BitMaps.sol",
-    # "/shared/cache/bazel/user_base/2a38f4143004a5b13cc7ebd21a4945b4/execroot/__main__/bazel-out/k8-fastbuild/bin/node_modules/.aspect_rules_js/@openzeppelin+contracts@4.7.0/node_modules/@openzeppelin/contracts/utils/structs/BitMaps.sol".
-    #
-    # So, our solution is to wrap solc with a small program that calculates a path to the non-sandbox execroot and add the --allow-paths flag.
-    shim = ctx.actions.declare_file("run_solc.sh")
-    ctx.actions.write(
-        output = shim,
-        content = """#!/usr/bin/env bash
-extra_arg=""
-search="$(pwd)"
-while true; do
-    [[ "$search" == "/" ]] && break
-    if [[ $(basename "$search") == "sandbox" ]]; then
-        # Explicitly allow solc to read files in the execroot outside the Bazel sandbox
-        extra_arg="--allow-paths $(pwd),$(dirname $search),/home/alexeagle/Projects/rules_sol/examples/npm_deps/"
-    fi
-    search="$(dirname "$search")"
-done
-exec {solc} $@ $extra_arg""".format(
-            solc = solinfo.target_tool_path
-        ),
-        is_executable = True,
-    )
+    # Effectively disable this security feature - Bazel's sandbox ensures reproducibility
+    # Anyhow, as very few compilers do such a thing, the solc layer isn't the right place to solve.
+    args.add_all(["--allow-paths", "/"])
 
     ctx.actions.run(
-        executable = shim,
+        executable = solinfo.target_tool_path,
         arguments = [args],
         inputs = depset(ctx.files.srcs, transitive = _gather_transitive_sources(ctx.attr.deps) + [npm_deps]),
         outputs = outputs,
