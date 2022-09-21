@@ -2,6 +2,7 @@
 
 TODO:
 - use `--optimize` if compilation_mode=opt
+- make it silent on success
 """
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
@@ -32,7 +33,7 @@ _ATTRS = {
     "combined_json": attr.string_list(
         doc = """Output a single json document containing the specified information.""",
         # Thanks bazel... https://github.com/bazelbuild/bazel/issues/6638
-        # values = ,
+        # allowed values can't be specified here
         default = ["abi", "bin", "hashes"],
     ),
 }
@@ -120,45 +121,14 @@ def _run_solc(ctx):
     # Anyhow, as very few compilers do such a thing, the solc layer isn't the right place to solve.
     args.add_all(["--allow-paths", "/"])
 
-    shim = ctx.actions.declare_file("_solc_{}.sh".format(ctx.label.name))
-    ctx.actions.write(shim, """#!/usr/bin/env bash
-set -o pipefail -o errexit -o nounset
-STDOUT_CAPTURE=$(mktemp)
-
-_exit() {{
-    EXIT_CODE=$?
-
-    if [ "${{STDOUT_OUTPUT_FILE:-}}" ]; then
-        cp -f "$STDOUT_CAPTURE" "$STDOUT_OUTPUT_FILE"
-    fi
-    if [ "$EXIT_CODE" != 0 ]; then
-        cat "$STDOUT_CAPTURE"
-    fi
-    rm "$STDOUT_CAPTURE"
-
-    exit $EXIT_CODE
-}}
-
-trap _exit EXIT
-if [ "${{STDOUT_OUTPUT_FILE:-}}" ]; then
-    STDOUT_OUTPUT_FILE="$PWD/$STDOUT_OUTPUT_FILE"
-fi
-
-{} $@ >>"$STDOUT_CAPTURE"    
-""".format(solinfo.target_tool_path), is_executable = True)
-
     ctx.actions.run(
-        executable = shim,
+        executable = solinfo.target_tool_path,
         arguments = [args],
         inputs = depset(ctx.files.srcs, transitive = _gather_transitive_sources(ctx.attr.deps) + [npm_deps]),
         outputs = outputs,
         tools = solinfo.tool_files,
         mnemonic = "Solc",
         progress_message = "solc compile " + outputs[0].short_path,
-        env = {
-            # TODO: use this if we ever need to provide solc's stdout as a Bazel output
-            # "STDOUT_OUTPUT_FILE": stdout.path,
-        },
     )
 
     return depset(outputs)
