@@ -1,18 +1,24 @@
 # Override http_archive for local testing
 local_repository(
-    name = "com_myorg_rules_mylang",
+    name = "aspect_rules_sol",
     path = "../..",
 )
 
 #---SNIP--- Below here is re-used in the workspace snippet published on releases
 
 ######################
-# rules_mylang setup #
+# rules_sol setup    #
 ######################
-# Fetches the rules_mylang dependencies.
+load("@aspect_rules_sol//sol:repositories.bzl", "LATEST_VERSION", "rules_sol_dependencies", "sol_register_toolchains")
+
+# Fetches the rules_sol dependencies.
 # If you want to have a different version of some dependency,
 # you should fetch it *before* calling this.
 # Alternatively, you can skip calling this function, so long as you've
 # already fetched all the dependencies.
-load("@com_myorg_rules_mylang//mylang:repositories.bzl", "rules_mylang_dependencies")
-rules_mylang_dependencies()
+rules_sol_dependencies()
+
+sol_register_toolchains(
+    name = "solc",
+    sol_version = LATEST_VERSION,
+)

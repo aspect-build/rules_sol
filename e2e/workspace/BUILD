@@ -1,17 +1,22 @@
-"""Provides a simple way to test your rules as an external workspace.
-Add a basic smoke-test target below.
-"""
+load("@bazel_skylib//rules:select_file.bzl", "select_file")
+load("@aspect_rules_sol//sol:defs.bzl", "sol_binary")
+load("@aspect_bazel_lib//lib:write_source_files.bzl", "write_source_files")
 
-load("@bazel_skylib//rules:build_test.bzl", "build_test")
-# load("com_myorg_rules_mylang//mylang:defs.bzl", "...")
+sol_binary(
+    name = "solc",
+    srcs = ["HelloWorld.sol"],
+    ast_compact_json = True,
+)
 
-# Replace with a usage of your rule/macro
-filegroup(name = "empty")
+select_file(
+    name = "pick_ast",
+    srcs = "solc",
+    subpath = "HelloWorld.sol_json.ast",
+)
 
-build_test(
-    name = "smoke_test",
-    targets = [
-        # targets you add above
-        ":empty",
-    ],
+write_source_files(
+    name = "write_golden",
+    files = {
+        "HelloWorld.json": "pick_ast",
+    },
 )

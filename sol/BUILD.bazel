@@ -16,8 +16,8 @@ bzl_library(
     srcs = ["repositories.bzl"],
     visibility = ["//visibility:public"],
     deps = [
-        "//mylang/private:toolchains_repo",
-        "//mylang/private:versions",
+        "//sol/private:toolchains_repo",
+        "//sol/private:versions",
         "@bazel_tools//tools/build_defs/repo:http.bzl",
         "@bazel_tools//tools/build_defs/repo:utils.bzl",
     ],
@@ -26,6 +26,16 @@ bzl_library(
 bzl_library(
     name = "defs",
     srcs = ["defs.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//sol/private:sol_binary",
+        "//sol/private:sol_sources",
+    ],
+)
+
+bzl_library(
+    name = "providers",
+    srcs = ["providers.bzl"],
     visibility = ["//visibility:public"],
 )
 
