@@ -1,5 +1,5 @@
 "Mirrored release data from binaries.soliditylang.org, generated from tools/mirror_releases.sh"
-LATEST_VERSION = "0.8.17"
+LATEST_VERSION = "0.8.19"
 TOOL_VERSIONS = {}
 
 # Vendored from https://binaries.soliditylang.org/macosx-amd64/list.json
@@ -340,6 +340,14 @@ TOOL_VERSIONS["macosx-amd64"] = {
         "path": "solc-macosx-amd64-v0.8.17+commit.8df45f5f",
         "sha256": "sha256-5A7vg8JNTEK0f0YbAXSKbKifHgnneJlbcd6/oN6Z4So=",
     },
+    "0.8.18": {
+        "path": "solc-macosx-amd64-v0.8.18+commit.87f61d96",
+        "sha256": "sha256-jxUofHma0rM/JB0SUiJqvaXUvD72vkC5RpIxePxX05c=",
+    },
+    "0.8.19": {
+        "path": "solc-macosx-amd64-v0.8.19+commit.7dd6d404",
+        "sha256": "sha256-OMhSOrZ+Cz4hxIGJ1r+5mtaHm5zgLg2ALsi+WYuyYi0=",
+    },
 }
 
 # Vendored from https://binaries.soliditylang.org/linux-amd64/list.json
@@ -635,6 +643,14 @@ TOOL_VERSIONS["linux-amd64"] = {
     "0.8.17": {
         "path": "solc-linux-amd64-v0.8.17+commit.8df45f5f",
         "sha256": "sha256-mfIHC3dulxTx92xDwinPmbiXipKTjujSNkxt4RwaA9Q=",
+    },
+    "0.8.18": {
+        "path": "solc-linux-amd64-v0.8.18+commit.87f61d96",
+        "sha256": "sha256-lebtSUmmOtia+0Q+y6H7gwLdKGDuXpuqzj5nSg9Iqnc=",
+    },
+    "0.8.19": {
+        "path": "solc-linux-amd64-v0.8.19+commit.7dd6d404",
+        "sha256": "sha256-elwdPcmo66Yrsuw3GSyReK5f6KVKVuVXP9PJwXzZ60g=",
     },
 }
 
@@ -959,5 +975,13 @@ TOOL_VERSIONS["windows-amd64"] = {
     "0.8.17": {
         "path": "solc-windows-amd64-v0.8.17+commit.8df45f5f.exe",
         "sha256": "sha256-dhXgGWZvKcfneyD5xQbdqDmodfvJuvMyLSE0jIjAXGk=",
+    },
+    "0.8.18": {
+        "path": "solc-windows-amd64-v0.8.18+commit.87f61d96.exe",
+        "sha256": "sha256-NBPXd+WgjnJAxdx+amGvvF+3iUm6Cqgco8nprTHQNJA=",
+    },
+    "0.8.19": {
+        "path": "solc-windows-amd64-v0.8.19+commit.7dd6d404.exe",
+        "sha256": "sha256-ANO1ymSwl5ZO1tcNmAWmP90nETsHwbJVnb/dV5+ZRQg=",
     },
 }
