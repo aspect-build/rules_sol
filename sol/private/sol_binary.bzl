@@ -75,6 +75,7 @@ def _run_solc(ctx):
     args.add_joined([ctx.bin_dir.path, ctx.label.package], join_with = "/")
 
     root_packages = []
+    remappings = {}
     for dep in ctx.attr.deps:
         if JsInfo in dep:
             for pkg in dep[JsInfo].transitive_npm_linked_packages.to_list():
@@ -82,7 +83,10 @@ def _run_solc(ctx):
                 root_packages.append(pkg.store_info.root_package)
         if SolSourcesInfo in dep:
             for prefix, target in dep[SolSourcesInfo].remappings.items():
+                if prefix in remappings:
+                    fail("Duplicate remappings prefix %s" % prefix)
                 args.add_joined([prefix, target], join_with = "=")
+                remappings[prefix] = target
 
     if len(root_packages):
         args.add("--include-path")
@@ -129,6 +133,13 @@ def _run_solc(ctx):
         tools = solinfo.tool_files,
         mnemonic = "Solc",
         progress_message = "solc compile " + outputs[0].short_path,
+    )
+
+    # Write a remappings.txt compatible with Forge
+    outputs.append(ctx.actions.declare_file("remappings.txt"))
+    ctx.actions.write(
+        output = outputs[-1],
+        content = "\n".join(["%s=%s" % x for x in remappings.items()]),
     )
 
     return depset(outputs)
