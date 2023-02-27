@@ -4,13 +4,6 @@ local_repository(
     path = "../..",
 )
 
-local_repository(
-    name = "fake_remote_repo",
-    path = "../fake_remote_repo",
-)
-
-#---SNIP--- Below here is re-used in the workspace snippet published on releases
-
 ######################
 # rules_sol setup    #
 ######################

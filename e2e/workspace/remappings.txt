@@ -1,0 +1,2 @@
+remapped-fake-remote-repo/=./external/fake_remote_repo/
+alternate-remapped-fake-remote-repo/=./external/fake_remote_repo/
