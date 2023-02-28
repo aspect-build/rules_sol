@@ -6,6 +6,8 @@ sol_binary(
     name = "solc",
     srcs = ["HelloWorld.sol"],
     ast_compact_json = True,
+    remappings = "remappings",
+    deps = ["@fake_remote_repo//:echo"],
 )
 
 select_file(
@@ -18,5 +20,6 @@ write_source_files(
     name = "write_golden",
     files = {
         "HelloWorld.json": "pick_ast",
+        "remappings.txt": ":remappings",
     },
 )

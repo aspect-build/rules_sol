@@ -36,6 +36,9 @@ _ATTRS = {
         # allowed values can't be specified here
         default = ["abi", "bin", "hashes"],
     ),
+    "remappings": attr.output(
+        doc = """File to which an equivalent of Forge's remappings.txt will be written.""",
+    ),
 }
 
 def _calculate_outs(ctx):
@@ -75,6 +78,7 @@ def _run_solc(ctx):
     args.add_joined([ctx.bin_dir.path, ctx.label.package], join_with = "/")
 
     root_packages = []
+    remappings = {}
     for dep in ctx.attr.deps:
         if JsInfo in dep:
             for pkg in dep[JsInfo].transitive_npm_linked_packages.to_list():
@@ -82,7 +86,12 @@ def _run_solc(ctx):
                 root_packages.append(pkg.store_info.root_package)
         if SolSourcesInfo in dep:
             for prefix, target in dep[SolSourcesInfo].remappings.items():
+                if prefix in remappings:
+                    if remappings[prefix] == target:
+                        continue
+                    fail("Duplicate remappings prefix %s" % prefix)
                 args.add_joined([prefix, target], join_with = "=")
+                remappings[prefix] = target
 
     if len(root_packages):
         args.add("--include-path")
@@ -130,6 +139,12 @@ def _run_solc(ctx):
         mnemonic = "Solc",
         progress_message = "solc compile " + outputs[0].short_path,
     )
+
+    if ctx.outputs.remappings:
+        ctx.actions.write(
+            output = ctx.outputs.remappings,
+            content = "\n".join(["%s=%s" % x for x in remappings.items()]),  # remappings.txt compatible with Forge
+        )
 
     return depset(outputs)
 
