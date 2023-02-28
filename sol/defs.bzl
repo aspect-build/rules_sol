@@ -12,6 +12,7 @@ sol_binary = rule(
     attrs = lib.attrs,
     doc = """sol_binary compiles Solidity source files with solc""",
     toolchains = lib.toolchains,
+    outputs = lib.outputs,
 )
 
 sol_sources = rule(

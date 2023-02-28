@@ -36,6 +36,9 @@ _ATTRS = {
         # allowed values can't be specified here
         default = ["abi", "bin", "hashes"],
     ),
+    "remappings": attr.output(
+        doc = """File to which an equivalent of Forge's remappings.txt will be written.""",
+    ),
 }
 
 def _calculate_outs(ctx):
@@ -84,6 +87,8 @@ def _run_solc(ctx):
         if SolSourcesInfo in dep:
             for prefix, target in dep[SolSourcesInfo].remappings.items():
                 if prefix in remappings:
+                    if remappings[prefix] == target:
+                        continue
                     fail("Duplicate remappings prefix %s" % prefix)
                 args.add_joined([prefix, target], join_with = "=")
                 remappings[prefix] = target
@@ -135,12 +140,11 @@ def _run_solc(ctx):
         progress_message = "solc compile " + outputs[0].short_path,
     )
 
-    # Write a remappings.txt compatible with Forge
-    outputs.append(ctx.actions.declare_file("remappings.txt"))
-    ctx.actions.write(
-        output = outputs[-1],
-        content = "\n".join(["%s=%s" % x for x in remappings.items()]),
-    )
+    if ctx.outputs.remappings:
+        ctx.actions.write(
+            output = ctx.outputs.remappings,
+            content = "\n".join(["%s=%s" % x for x in remappings.items()]),  # remappings.txt compatible with Forge
+        )
 
     return depset(outputs)
 
@@ -153,4 +157,5 @@ sol_binary = struct(
     implementation = _sol_binary_impl,
     attrs = _ATTRS,
     toolchains = ["@aspect_rules_sol//sol:toolchain_type"],
+    outputs = {},
 )
