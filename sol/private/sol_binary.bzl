@@ -157,5 +157,4 @@ sol_binary = struct(
     implementation = _sol_binary_impl,
     attrs = _ATTRS,
     toolchains = ["@aspect_rules_sol//sol:toolchain_type"],
-    outputs = {},
 )
