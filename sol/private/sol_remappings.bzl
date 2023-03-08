@@ -1,4 +1,4 @@
-"""TODO"""
+"""Implementation for sol_remappings."""
 
 load("//sol:providers.bzl", "SolRemappingsInfo")
 load("//sol/private:common.bzl", "transitive_remappings")

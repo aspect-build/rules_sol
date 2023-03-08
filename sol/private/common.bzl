@@ -2,20 +2,20 @@
 
 load("//sol:providers.bzl", "SolRemappingsInfo")
 
-def transitive_remappings(ctx, add_remappings = {}):
-    """Returns the union of extra_remappings and all remappings in ctx.deps that provide SolRemappingsInfo.
+def transitive_remappings(ctx, extra_remappings = {}):
+    """Combine remappings from ctx.deps.
 
     Fails if duplicate remapping prefixes are found with different targets.
 
     Args:
-        ctx: TODO
-        add_remappings: TODO
+        ctx: Context object from which deps are sourced.
+        extra_remappings: Additional remappings to be added to those found in ctx.deps.
 
     Returns:
-    TODO
+    The union of extra_remappings and all remappings in ctx.deps that provide SolRemappingsInfo.
     """
 
-    remappings = {k: v for (k, v) in add_remappings.items()}
+    remappings = {k: v for (k, v) in extra_remappings.items()}
     for dep in ctx.attr.deps:
         if SolRemappingsInfo in dep:
             for prefix, target in dep[SolRemappingsInfo].remappings.items():
