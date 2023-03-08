@@ -37,7 +37,7 @@ sol_binary compiles Solidity source files with solc
 sol_remappings(<a href="#sol_remappings-name">name</a>, <a href="#sol_remappings-deps">deps</a>, <a href="#sol_remappings-remappings">remappings</a>)
 </pre>
 
-sol_remappings generates a Forge-compatible remappings.txt file.
+sol_remappings combines remappings from multiple targets, and generates a Forge-compatible remappings.txt file.
 
 **ATTRIBUTES**
 
