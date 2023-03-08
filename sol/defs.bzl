@@ -19,7 +19,7 @@ sol_binary = rule(
 sol_remappings = rule(
     implementation = remap.implementation,
     attrs = remap.attrs,
-    doc = """sol_remappings generates a Forge-compatible remappings.txt file.""",
+    doc = """sol_remappings combines remappings from multiple targets, and generates a Forge-compatible remappings.txt file.""",
     provides = [SolRemappingsInfo],
 )
 

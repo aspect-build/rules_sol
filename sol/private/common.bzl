@@ -1,4 +1,4 @@
-"Shared functionality used by one or more rule"
+"""Shared functionality used by one or more rules."""
 
 load("//sol:providers.bzl", "SolRemappingsInfo")
 
