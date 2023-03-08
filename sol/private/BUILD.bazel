@@ -17,6 +17,7 @@ bzl_library(
     srcs = ["sol_binary.bzl"],
     visibility = ["//sol:__subpackages__"],
     deps = [
+        ":common",
         "//sol:providers",
         "@aspect_rules_js//js:libs",
         "@aspect_rules_js//js:providers",
@@ -25,12 +26,31 @@ bzl_library(
 )
 
 bzl_library(
+    name = "sol_remappings",
+    srcs = ["sol_remappings.bzl"],
+    visibility = ["//sol:__subpackages__"],
+    deps = [
+        ":common",
+        "//sol:providers",
+        "@aspect_bazel_lib//lib:write_source_files",
+    ],
+)
+
+bzl_library(
     name = "sol_sources",
     srcs = ["sol_sources.bzl"],
     visibility = ["//sol:__subpackages__"],
     deps = [
+        ":common",
         "//sol:providers",
         "@aspect_rules_js//js:libs",
         "@aspect_rules_js//js:providers",
     ],
+)
+
+bzl_library(
+    name = "common",
+    srcs = ["common.bzl"],
+    visibility = ["//sol:__subpackages__"],
+    deps = ["//sol:providers"],
 )

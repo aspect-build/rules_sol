@@ -10,7 +10,7 @@ See <https://docs.soliditylang.org>
 ## sol_binary
 
 <pre>
-sol_binary(<a href="#sol_binary-name">name</a>, <a href="#sol_binary-args">args</a>, <a href="#sol_binary-ast_compact_json">ast_compact_json</a>, <a href="#sol_binary-bin">bin</a>, <a href="#sol_binary-combined_json">combined_json</a>, <a href="#sol_binary-deps">deps</a>, <a href="#sol_binary-remappings">remappings</a>, <a href="#sol_binary-srcs">srcs</a>)
+sol_binary(<a href="#sol_binary-name">name</a>, <a href="#sol_binary-args">args</a>, <a href="#sol_binary-ast_compact_json">ast_compact_json</a>, <a href="#sol_binary-bin">bin</a>, <a href="#sol_binary-combined_json">combined_json</a>, <a href="#sol_binary-deps">deps</a>, <a href="#sol_binary-srcs">srcs</a>)
 </pre>
 
 sol_binary compiles Solidity source files with solc
@@ -26,8 +26,27 @@ sol_binary compiles Solidity source files with solc
 | <a id="sol_binary-bin"></a>bin |  Whether to emit binary of the contracts in hex.   | Boolean | optional | False |
 | <a id="sol_binary-combined_json"></a>combined_json |  Output a single json document containing the specified information.   | List of strings | optional | ["abi", "bin", "hashes"] |
 | <a id="sol_binary-deps"></a>deps |  Solidity libraries, either first-party sol_sources, or third-party distributed as packages on npm   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | [] |
-| <a id="sol_binary-remappings"></a>remappings |  File to which an equivalent of Forge's remappings.txt will be written.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  |
 | <a id="sol_binary-srcs"></a>srcs |  Solidity source files   | <a href="https://bazel.build/concepts/labels">List of labels</a> | required |  |
+
+
+<a id="sol_remappings"></a>
+
+## sol_remappings
+
+<pre>
+sol_remappings(<a href="#sol_remappings-name">name</a>, <a href="#sol_remappings-deps">deps</a>, <a href="#sol_remappings-remappings">remappings</a>)
+</pre>
+
+sol_remappings generates a Forge-compatible remappings.txt file.
+
+**ATTRIBUTES**
+
+
+| Name  | Description | Type | Mandatory | Default |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="sol_remappings-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="sol_remappings-deps"></a>deps |  sol_binary, sol_sources, or other sol_remappings targets from which remappings are combined.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | required |  |
+| <a id="sol_remappings-remappings"></a>remappings |  Additional import remappings.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional | {} |
 
 
 <a id="sol_sources"></a>

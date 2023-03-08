@@ -8,7 +8,8 @@ TODO:
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@aspect_rules_js//js:providers.bzl", "JsInfo")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
-load("//sol:providers.bzl", "SolSourcesInfo")
+load("//sol:providers.bzl", "SolRemappingsInfo", "SolSourcesInfo")
+load("//sol/private:common.bzl", "transitive_remappings")
 
 _OUTPUT_COMPONENTS = ["abi", "asm", "ast", "bin", "bin-runtime", "devdoc", "function-debug", "function-debug-runtime", "generated-sources", "generated-sources-runtime", "hashes", "metadata", "opcodes", "srcmap", "srcmap-runtime", "storage-layout", "userdoc"]
 _ATTRS = {
@@ -22,7 +23,7 @@ _ATTRS = {
     ),
     "deps": attr.label_list(
         doc = "Solidity libraries, either first-party sol_sources, or third-party distributed as packages on npm",
-        providers = [[SolSourcesInfo], [JsInfo]],
+        providers = [[SolRemappingsInfo, SolSourcesInfo], [JsInfo]],
     ),
     "bin": attr.bool(
         doc = "Whether to emit binary of the contracts in hex.",
@@ -35,9 +36,6 @@ _ATTRS = {
         # Thanks bazel... https://github.com/bazelbuild/bazel/issues/6638
         # allowed values can't be specified here
         default = ["abi", "bin", "hashes"],
-    ),
-    "remappings": attr.output(
-        doc = """File to which an equivalent of Forge's remappings.txt will be written.""",
     ),
 }
 
@@ -78,20 +76,15 @@ def _run_solc(ctx):
     args.add_joined([ctx.bin_dir.path, ctx.label.package], join_with = "/")
 
     root_packages = []
-    remappings = {}
     for dep in ctx.attr.deps:
         if JsInfo in dep:
             for pkg in dep[JsInfo].transitive_npm_linked_packages.to_list():
                 # Where the node_modules were installed
                 root_packages.append(pkg.store_info.root_package)
-        if SolSourcesInfo in dep:
-            for prefix, target in dep[SolSourcesInfo].remappings.items():
-                if prefix in remappings:
-                    if remappings[prefix] == target:
-                        continue
-                    fail("Duplicate remappings prefix %s" % prefix)
-                args.add_joined([prefix, target], join_with = "=")
-                remappings[prefix] = target
+
+    remappings = transitive_remappings(ctx)
+    for (prefix, target) in remappings.items():
+        args.add_joined([prefix, target], join_with = "=")
 
     if len(root_packages):
         args.add("--include-path")
@@ -140,18 +133,15 @@ def _run_solc(ctx):
         progress_message = "solc compile " + outputs[0].short_path,
     )
 
-    if ctx.outputs.remappings:
-        ctx.actions.write(
-            output = ctx.outputs.remappings,
-            content = "\n".join(["%s=%s" % x for x in remappings.items()]),  # remappings.txt compatible with Forge
-        )
-
-    return depset(outputs)
+    return [
+        DefaultInfo(files = depset(outputs)),
+        SolRemappingsInfo(
+            remappings = remappings,
+        ),
+    ]
 
 def _sol_binary_impl(ctx):
-    return [
-        DefaultInfo(files = _run_solc(ctx)),
-    ]
+    return _run_solc(ctx)
 
 sol_binary = struct(
     implementation = _sol_binary_impl,

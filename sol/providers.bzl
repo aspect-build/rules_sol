@@ -5,6 +5,12 @@ SolSourcesInfo = provider(
     fields = {
         "direct_sources": "list of sources provided to this node",
         "transitive_sources": "depset of transitive dependency sources",
+    },
+)
+
+SolRemappingsInfo = provider(
+    doc = "TODO",
+    fields = {
         "remappings": "dictionary of import remappings to propagate to solc",
     },
 )

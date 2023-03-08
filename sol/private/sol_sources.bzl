@@ -1,9 +1,9 @@
 "Implementation for sol_sources rule"
 
 load("@aspect_rules_js//js:providers.bzl", "JsInfo", "js_info")
-load("//sol:providers.bzl", "SolSourcesInfo")
+load("//sol:providers.bzl", "SolRemappingsInfo", "SolSourcesInfo")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
-load("@bazel_skylib//lib:dicts.bzl", "dicts")
+load("//sol/private:common.bzl", "transitive_remappings")
 
 _ATTRS = {
     "srcs": attr.label_list(
@@ -29,11 +29,6 @@ def _sol_sources_impl(ctx):
         deps = ctx.attr.deps,
     )
 
-    transitive_remappings = [dep[SolSourcesInfo].remappings for dep in ctx.attr.deps if SolSourcesInfo in dep]
-
-    # TODO: detect and error on conflicting mappings from same value to different keys
-    remappings = dicts.add(ctx.attr.remappings, *transitive_remappings)
-
     return [
         DefaultInfo(
             files = depset(ctx.files.srcs),
@@ -48,7 +43,9 @@ def _sol_sources_impl(ctx):
                     if SolSourcesInfo in d
                 ],
             ),
-            remappings = remappings,
+        ),
+        SolRemappingsInfo(
+            remappings = transitive_remappings(ctx, ctx.attr.remappings),
         ),
         js_info(
             npm_linked_packages = npm_linked_packages.direct,
