@@ -1,7 +1,6 @@
 """Implementation for sol_remappings."""
 
-load("//sol:providers.bzl", "SolRemappingsInfo")
-load("//sol/private:common.bzl", "transitive_remappings")
+load("//sol:providers.bzl", "SolRemappingsInfo", "sol_remappings_info")
 
 _ATTRS = {
     "deps": attr.label_list(
@@ -16,17 +15,17 @@ _ATTRS = {
 }
 
 def _sol_remappings_impl(ctx):
-    remappings = transitive_remappings(ctx, ctx.attr.remappings)
+    remappings_info = sol_remappings_info(ctx, ctx.attr.remappings)
 
     output = ctx.actions.declare_file("remappings.txt")
     ctx.actions.write(
         output = output,
-        content = "\n".join(["%s=%s" % x for x in remappings.items()]),
+        content = "\n".join(["%s=%s" % x for x in remappings_info.remappings.items()]),
     )
 
     return [
         DefaultInfo(files = depset([output])),
-        SolRemappingsInfo(remappings = remappings),
+        remappings_info,
     ]
 
 sol_remappings = struct(

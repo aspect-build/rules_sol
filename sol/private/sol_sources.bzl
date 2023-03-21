@@ -1,9 +1,8 @@
 "Implementation for sol_sources rule"
 
 load("@aspect_rules_js//js:providers.bzl", "JsInfo", "js_info")
-load("//sol:providers.bzl", "SolRemappingsInfo", "SolSourcesInfo")
+load("//sol:providers.bzl", "SolSourcesInfo", "sol_remappings_info")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
-load("//sol/private:common.bzl", "transitive_remappings")
 
 _ATTRS = {
     "srcs": attr.label_list(
@@ -44,9 +43,7 @@ def _sol_sources_impl(ctx):
                 ],
             ),
         ),
-        SolRemappingsInfo(
-            remappings = transitive_remappings(ctx, ctx.attr.remappings),
-        ),
+        sol_remappings_info(ctx, ctx.attr.remappings),
         js_info(
             npm_linked_packages = npm_linked_packages.direct,
             npm_linked_package_files = npm_linked_packages.direct_files,

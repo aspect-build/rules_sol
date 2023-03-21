@@ -8,8 +8,7 @@ TODO:
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@aspect_rules_js//js:providers.bzl", "JsInfo")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
-load("//sol:providers.bzl", "SolRemappingsInfo", "SolSourcesInfo")
-load("//sol/private:common.bzl", "transitive_remappings")
+load("//sol:providers.bzl", "SolRemappingsInfo", "SolSourcesInfo", "sol_remappings_info")
 
 _OUTPUT_COMPONENTS = ["abi", "asm", "ast", "bin", "bin-runtime", "devdoc", "function-debug", "function-debug-runtime", "generated-sources", "generated-sources-runtime", "hashes", "metadata", "opcodes", "srcmap", "srcmap-runtime", "storage-layout", "userdoc"]
 _ATTRS = {
@@ -82,8 +81,8 @@ def _run_solc(ctx):
                 # Where the node_modules were installed
                 root_packages.append(pkg.store_info.root_package)
 
-    remappings = transitive_remappings(ctx)
-    for (prefix, target) in remappings.items():
+    remappings_info = sol_remappings_info(ctx)
+    for (prefix, target) in remappings_info.remappings.items():
         args.add_joined([prefix, target], join_with = "=")
 
     if len(root_packages):
@@ -135,9 +134,7 @@ def _run_solc(ctx):
 
     return [
         DefaultInfo(files = depset(outputs)),
-        SolRemappingsInfo(
-            remappings = remappings,
-        ),
+        remappings_info,
     ]
 
 def _sol_binary_impl(ctx):

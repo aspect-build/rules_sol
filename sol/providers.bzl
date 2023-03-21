@@ -1,5 +1,11 @@
 "Providers for rule interop"
 
+load(
+    "//sol/private:sol_remappings_info.bzl",
+    _SolRemappingsInfo = "SolRemappingsInfo",
+    _sol_remappings_info = "sol_remappings_info",
+)
+
 SolSourcesInfo = provider(
     doc = "Stores a tree of source file dependencies",
     fields = {
@@ -8,14 +14,5 @@ SolSourcesInfo = provider(
     },
 )
 
-SolRemappingsInfo = provider(
-    doc = """Stores a dictionary of solc remappings.
-    
-    Allows for piping of remappings through a dependency tree of targets. Rules
-    that accept a "remappings" attribute and/or dependencies that provide
-    SolRemappingsInfo SHOULD propagate their union via a SolRemappingsInfo.
-    """,
-    fields = {
-        "remappings": "dictionary of import remappings to propagate to solc",
-    },
-)
+SolRemappingsInfo = _SolRemappingsInfo
+sol_remappings_info = _sol_remappings_info
