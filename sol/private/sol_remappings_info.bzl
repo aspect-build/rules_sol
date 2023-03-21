@@ -18,25 +18,11 @@ def sol_remappings_info(ctx, extra_remappings = {}):
     Fails if duplicate remapping prefixes are found with different targets.
 
     Args:
-        ctx: Context object from the implementation constructing a SolRemappingsInfo. All deps will be checked for
-        SolRemappingsInfo providers to transitively propagate.
-        extra_remappings: Additional remappings to be added to those found in ctx.srcs and ctx.deps.
-    """
-    return SolRemappingsInfo(
-        remappings = _transitive_remappings(ctx, extra_remappings),
-    )
-
-def _transitive_remappings(ctx, extra_remappings = {}):
-    """Combine remappings from ctx.deps.
-
-    Fails if duplicate remapping prefixes are found with different targets.
-
-    Args:
-        ctx: Context object from which deps are sourced.
+        ctx: Context object from the implementation constructing a SolRemappingsInfo.
         extra_remappings: Additional remappings to be added to those found in ctx.deps.
 
     Returns:
-    The union of extra_remappings and all remappings in ctx.deps that provide SolRemappingsInfo.
+        SolRemappingsInfo transitively combining all SolRemappingsInfo in ctx.deps plus extra_remappings.
     """
 
     remappings = {k: v for (k, v) in extra_remappings.items()}
@@ -49,4 +35,6 @@ def _transitive_remappings(ctx, extra_remappings = {}):
                     fail("Duplicate remappings prefix %s" % prefix)
                 remappings[prefix] = target
 
-    return remappings
+    return SolRemappingsInfo(
+        remappings = remappings,
+    )
