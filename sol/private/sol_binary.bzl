@@ -36,6 +36,9 @@ _ATTRS = {
         # allowed values can't be specified here
         default = ["abi", "bin", "hashes"],
     ),
+    # "_allowlist_function_transition": attr.label(
+    #   default = "@bazel_tools//tools/allowlists/function_transition_allowlist"
+    # ),
 }
 
 def _calculate_outs(ctx):
