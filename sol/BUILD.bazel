@@ -29,6 +29,8 @@ bzl_library(
     visibility = ["//visibility:public"],
     deps = [
         "//sol/private:sol_binary",
+        "//sol/private:sol_remappings",
+        "//sol/private:sol_remappings_info",
         "//sol/private:sol_sources",
     ],
 )
