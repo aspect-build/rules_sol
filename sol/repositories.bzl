@@ -89,7 +89,7 @@ sol_repositories = repository_rule(
 )
 
 # Wrapper macro around everything above, this is the primary API
-def sol_register_toolchains(name, **kwargs):
+def sol_register_toolchains(name, sol_version, **kwargs):
     """Convenience macro for users which does typical setup.
 
     - create a repository for each built-in platform like "sol_linux_amd64" -
@@ -100,17 +100,21 @@ def sol_register_toolchains(name, **kwargs):
     Users can avoid this macro and do these steps themselves, if they want more control.
     Args:
         name: base name for all created repos, like "sol1_14"
+        sol_version: version of solc compiler
         **kwargs: passed to each sol_repositories call
     """
     for platform in PLATFORMS.keys():
         sol_repositories(
             name = name + "_" + platform,
             platform = platform,
+            sol_version = sol_version,
             **kwargs
         )
-        native.register_toolchains("@%s_toolchains//:%s_toolchain" % (name, platform))
+
+    native.register_toolchains("@%s_toolchains//:all" % (name))
 
     toolchains_repo(
         name = name + "_toolchains",
         user_repository_name = name,
+        version = sol_version
     )

@@ -1,4 +1,23 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("@bazel_skylib//rules:common_settings.bzl", "string_setting")
+load(":versions.bzl", "TOOL_VERSIONS", "LATEST_VERSION")
+load(":utils.bzl", "normalize_version_string")
+
+string_setting(
+    name = "solc_version",
+    build_setting_default = LATEST_VERSION,
+    visibility = ["//visibility:public"],
+)
+
+[
+    config_setting(
+        name = "solc_version_{}".format(normalize_version_string(version)),
+        flag_values = { ":solc_version": version },
+        visibility = ["//visibility:public"],
+    )
+    for version in TOOL_VERSIONS["linux-amd64"].keys()
+]
+
 
 bzl_library(
     name = "toolchains_repo",

@@ -16,6 +16,7 @@ The "complex computation" in our case is simply downloading large artifacts.
 This guidance tells us how to avoid that: we put the toolchain targets in the alias repository
 with only the toolchain attribute pointing into the platform-specific repositories.
 """
+load(":utils.bzl", "normalize_version_string")
 
 # Add more platforms as needed to mirror all the binaries
 # published by the upstream project.
@@ -79,6 +80,7 @@ load(":defs.bzl", "resolved_toolchain")
 resolved_toolchain(name = "resolved_toolchain", visibility = ["//visibility:public"])
 
 """
+    version_constraint = "@aspect_rules_sol//sol/private:solc_version_{}".format(normalize_version_string(repository_ctx.attr.version))
 
     for [platform, meta] in PLATFORMS.items():
         build_content += """
@@ -86,7 +88,8 @@ resolved_toolchain(name = "resolved_toolchain", visibility = ["//visibility:publ
 # on the execution platform.
 toolchain(
     name = "{platform}_toolchain",
-    exec_compatible_with = {compatible_with},
+    target_compatible_with = {compatible_with},
+    target_settings = {target_settings},
     toolchain = "@{user_repository_name}_{platform}//:sol_toolchain",
     toolchain_type = "@aspect_rules_sol//sol:toolchain_type",
 )
@@ -95,6 +98,7 @@ toolchain(
             name = repository_ctx.attr.name,
             user_repository_name = repository_ctx.attr.user_repository_name,
             compatible_with = meta.compatible_with,
+            target_settings = [version_constraint],
         )
 
     # Base BUILD file for this repository
@@ -105,6 +109,7 @@ toolchains_repo = repository_rule(
     doc = """Creates a repository with toolchain definitions for all known platforms
      which can be registered or selected.""",
     attrs = {
-        "user_repository_name": attr.string(doc = "what the user chose for the base name"),
+        "user_repository_name": attr.string(doc = "what the user chose for the base name", mandatory = True),
+        "version": attr.string(mandatory = True)
     },
 )
