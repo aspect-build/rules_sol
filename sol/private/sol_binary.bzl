@@ -36,7 +36,7 @@ _ATTRS = {
         # allowed values can't be specified here
         default = ["abi", "bin", "hashes"],
     ),
-    "compiler_version": attr.string(),
+    "solc_version": attr.string(),
     "_allowlist_function_transition": attr.label(
         default = "@bazel_tools//tools/allowlists/function_transition_allowlist",
     ),
@@ -144,15 +144,15 @@ def _run_solc(ctx):
 def _sol_binary_impl(ctx):
     return _run_solc(ctx)
 
-def _impl(settings, attr):
-    if attr.compiler_version:
+def _solc_version_transition_impl(settings, attr):
+    if attr.solc_version:
         return {
-            "//sol/private:solc_version": attr.compiler_version,
+            "//sol/private:solc_version": attr.solc_version,
         }
     return {}
 
 solc_version_transition = transition(
-    implementation = _impl,
+    implementation = _solc_version_transition_impl,
     inputs = [],
     outputs = ["//sol/private:solc_version"],
 )

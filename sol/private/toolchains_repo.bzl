@@ -16,6 +16,7 @@ The "complex computation" in our case is simply downloading large artifacts.
 This guidance tells us how to avoid that: we put the toolchain targets in the alias repository
 with only the toolchain attribute pointing into the platform-specific repositories.
 """
+
 load(":utils.bzl", "normalize_version_string")
 
 # Add more platforms as needed to mirror all the binaries
@@ -88,7 +89,7 @@ resolved_toolchain(name = "resolved_toolchain", visibility = ["//visibility:publ
 # on the execution platform.
 toolchain(
     name = "{platform}_toolchain",
-    target_compatible_with = {compatible_with},
+    exec_compatible_with = {compatible_with},
     target_settings = {target_settings},
     toolchain = "@{user_repository_name}_{platform}//:sol_toolchain",
     toolchain_type = "@aspect_rules_sol//sol:toolchain_type",
@@ -110,6 +111,6 @@ toolchains_repo = repository_rule(
      which can be registered or selected.""",
     attrs = {
         "user_repository_name": attr.string(doc = "what the user chose for the base name", mandatory = True),
-        "version": attr.string(mandatory = True)
+        "version": attr.string(mandatory = True),
     },
 )
