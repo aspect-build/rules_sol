@@ -8,8 +8,7 @@ load("//sol/private:sol_remappings.bzl", remap = "sol_remappings")
 load("//sol/private:sol_sources.bzl", src = "sol_sources")
 load(":providers.bzl", "SolRemappingsInfo", "SolSourcesInfo")
 
-
-sol_binary_rule = rule(
+sol_binary = rule(
     implementation = lib.implementation,
     attrs = lib.attrs,
     cfg = lib.cfg,
@@ -24,9 +23,6 @@ sol_remappings = rule(
     doc = """sol_remappings combines remappings from multiple targets, and generates a Forge-compatible remappings.txt file.""",
     provides = [SolRemappingsInfo],
 )
-
-def sol_binary(name, **kwargs):
-    sol_binary_rule(name = name, **kwargs)
 
 sol_sources = rule(
     implementation = src.implementation,

@@ -10,7 +10,7 @@ See <https://docs.soliditylang.org>
 ## sol_binary
 
 <pre>
-sol_binary(<a href="#sol_binary-name">name</a>, <a href="#sol_binary-args">args</a>, <a href="#sol_binary-ast_compact_json">ast_compact_json</a>, <a href="#sol_binary-bin">bin</a>, <a href="#sol_binary-combined_json">combined_json</a>, <a href="#sol_binary-deps">deps</a>, <a href="#sol_binary-srcs">srcs</a>)
+sol_binary(<a href="#sol_binary-name">name</a>, <a href="#sol_binary-args">args</a>, <a href="#sol_binary-ast_compact_json">ast_compact_json</a>, <a href="#sol_binary-bin">bin</a>, <a href="#sol_binary-combined_json">combined_json</a>, <a href="#sol_binary-compiler_version">compiler_version</a>, <a href="#sol_binary-deps">deps</a>, <a href="#sol_binary-srcs">srcs</a>)
 </pre>
 
 sol_binary compiles Solidity source files with solc
@@ -25,6 +25,7 @@ sol_binary compiles Solidity source files with solc
 | <a id="sol_binary-ast_compact_json"></a>ast_compact_json |  Whether to emit AST of all source files in a compact JSON format.   | Boolean | optional | False |
 | <a id="sol_binary-bin"></a>bin |  Whether to emit binary of the contracts in hex.   | Boolean | optional | False |
 | <a id="sol_binary-combined_json"></a>combined_json |  Output a single json document containing the specified information.   | List of strings | optional | ["abi", "bin", "hashes"] |
+| <a id="sol_binary-compiler_version"></a>compiler_version |  -   | String | optional | "" |
 | <a id="sol_binary-deps"></a>deps |  Solidity libraries, either first-party sol_sources, or third-party distributed as packages on npm   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | [] |
 | <a id="sol_binary-srcs"></a>srcs |  Solidity source files   | <a href="https://bazel.build/concepts/labels">List of labels</a> | required |  |
 

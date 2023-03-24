@@ -17,8 +17,6 @@ load("//sol:repositories.bzl", "LATEST_VERSION", "rules_sol_dependencies", "sol_
 # Fetch dependencies which users need as well
 rules_sol_dependencies()
 
-# register_toolchains("//examples/multi_compiler:all")
-
 # Demonstrate that we can have multiple versions of solc available to Bazel rules
 [
     sol_register_toolchains(
@@ -27,6 +25,7 @@ rules_sol_dependencies()
     )
     for v in [
         LATEST_VERSION,
+        "0.8.9",
         "0.7.6",
     ]
 ]

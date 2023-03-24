@@ -1,7 +1,12 @@
 load("@aspect_rules_sol//sol:defs.bzl", "sol_binary")
 
+# TODO: The user already told us about the solidity version in their source file with a pragma.
+# It's a pity to make them repeat it here, and then provide no error checking if they get it wrong.
+# It would be neat for sol_binary to have a validation action that can tell the user about the
+# compiler_version attribute, if the toolchain doesn't support what we find in the file.
+# Maybe it could even suggest a buildozer command to fixup.
 sol_binary(
     name = "old",
     srcs = ["Older.sol"],
-    solc = "0.7.6",
+    compiler_version = "0.7.6",
 )
