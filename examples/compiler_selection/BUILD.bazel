@@ -1,0 +1,7 @@
+load("@aspect_rules_sol//sol:defs.bzl", "sol_binary")
+
+sol_binary(
+    name = "old",
+    srcs = ["Older.sol"],
+    solc = "0.7.6",
+)
