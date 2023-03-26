@@ -11,6 +11,7 @@ load(":providers.bzl", "SolRemappingsInfo", "SolSourcesInfo")
 sol_binary = rule(
     implementation = lib.implementation,
     attrs = lib.attrs,
+    cfg = lib.cfg,
     doc = """sol_binary compiles Solidity source files with solc""",
     toolchains = lib.toolchains,
     provides = [SolRemappingsInfo],

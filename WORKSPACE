@@ -26,6 +26,7 @@ rules_sol_dependencies()
     for v in [
         LATEST_VERSION,
         "0.8.9",
+        "0.7.6",
     ]
 ]
 
