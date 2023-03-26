@@ -8,7 +8,8 @@ TODO:
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@aspect_rules_js//js:providers.bzl", "JsInfo")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
-load("//sol:providers.bzl", "SolRemappingsInfo", "SolSourcesInfo", "sol_remappings_info")
+load("//sol:providers.bzl", "SolBinaryInfo", "SolRemappingsInfo", "SolSourcesInfo", "sol_remappings_info")
+load("//sol/private:versions.bzl", "TOOL_VERSIONS")
 
 _OUTPUT_COMPONENTS = ["abi", "asm", "ast", "bin", "bin-runtime", "devdoc", "function-debug", "function-debug-runtime", "generated-sources", "generated-sources-runtime", "hashes", "metadata", "opcodes", "srcmap", "srcmap-runtime", "storage-layout", "userdoc"]
 _ATTRS = {
@@ -105,7 +106,9 @@ def _run_solc(ctx):
     for v in ctx.attr.combined_json:
         if v not in _OUTPUT_COMPONENTS:
             fail("Illegal output component {}, must be one of {}".format(v, _OUTPUT_COMPONENTS))
-    if len(ctx.attr.combined_json):
+
+    has_combined_json = len(ctx.attr.combined_json) > 0
+    if has_combined_json:
         args.add("--combined-json")
         args.add_joined(ctx.attr.combined_json, join_with = ",")
 
@@ -136,8 +139,26 @@ def _run_solc(ctx):
         progress_message = "solc compile " + outputs[0].short_path,
     )
 
+    solc = solinfo.tool_files[0].basename
+
+    solc_version = solc
+    prefixes = ["solc-"]
+    prefixes.extend(TOOL_VERSIONS.keys())
+    prefixes.append("-v")
+    for p in prefixes:
+        solc_version = solc_version.removeprefix(p)
+    commit_pos = solc_version.find("+commit")
+    if commit_pos == -1:
+        fail("no solc commit found")
+    solc_version = solc_version[:commit_pos]
+
     return [
         DefaultInfo(files = depset(outputs)),
+        SolBinaryInfo(
+            solc_version = solc_version,
+            solc_binary = solc,
+            combined_json = [f for f in outputs if f.basename == "combined.json"][0] if has_combined_json else None,
+        ),
         remappings_info,
     ]
 

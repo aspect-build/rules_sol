@@ -6,7 +6,7 @@ See <https://docs.soliditylang.org>
 load("//sol/private:sol_binary.bzl", lib = "sol_binary")
 load("//sol/private:sol_remappings.bzl", remap = "sol_remappings")
 load("//sol/private:sol_sources.bzl", src = "sol_sources")
-load(":providers.bzl", "SolRemappingsInfo", "SolSourcesInfo")
+load(":providers.bzl", "SolBinaryInfo", "SolRemappingsInfo", "SolSourcesInfo")
 
 sol_binary = rule(
     implementation = lib.implementation,
@@ -14,7 +14,7 @@ sol_binary = rule(
     cfg = lib.cfg,
     doc = """sol_binary compiles Solidity source files with solc""",
     toolchains = lib.toolchains,
-    provides = [SolRemappingsInfo],
+    provides = [SolBinaryInfo, SolRemappingsInfo],
 )
 
 sol_remappings = rule(
