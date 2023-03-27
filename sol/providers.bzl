@@ -10,7 +10,7 @@ SolBinaryInfo = provider(
     doc = "Stores outputs of a sol_binary",
     fields = {
         "solc_version": "version of solc used",
-        "solc_binary": "full basename of solc binary used, including platform and commit ID",
+        "solc_bin": "full basename of solc binary used, including platform and commit ID",
         "combined_json": "combined.json file produced by solc",
     },
 )

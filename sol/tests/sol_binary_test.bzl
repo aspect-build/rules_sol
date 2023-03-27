@@ -44,7 +44,7 @@ def _solc_version_test_impl(ctx):
 
     info = binary[SolBinaryInfo]
     asserts.equals(env, ctx.attr.expected, info.solc_version, "SolBinaryInfo.solc_version")
-    asserts.true(env, info.solc_binary.find(info.solc_version) != -1, "SolBinaryInfo.solc_binary includes SolBinaryInfo.solc_version")
+    asserts.true(env, info.solc_bin.find(info.solc_version) != -1, "SolBinaryInfo.solc_bin includes SolBinaryInfo.solc_version")
 
     return analysistest.end(env)
 
@@ -72,7 +72,6 @@ def solc_version_test(name = "", target_under_test = "", **kwargs):
     )
 
     JQ = "_%s_jq" % name
-    JQ_OUT = "%s_out" % JQ
     jq(
         name = JQ,
         srcs = [INFO_ONLY],

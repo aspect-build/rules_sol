@@ -44,7 +44,12 @@ _ATTRS = {
 }
 
 def _calculate_outs(ctx):
-    "Predict what files the solc compiler will emit"
+    """Predict what files the solc compiler will emit.
+
+    Returns: a tuple of (a) a list of the predicted files; and (b) the combined.json
+    file if it is to be emitted, otherwise None. If (b) is not None then it is the
+    same file included in the list.
+    """
     result = []
     for src in ctx.files.srcs:
         relative_src = paths.relativize(src.short_path, ctx.label.package)
@@ -52,9 +57,13 @@ def _calculate_outs(ctx):
             result.append(ctx.actions.declare_file(paths.replace_extension(relative_src, ".bin")))
         if ctx.attr.ast_compact_json:
             result.append(ctx.actions.declare_file(relative_src + "_json.ast"))
-        if len(ctx.attr.combined_json):
-            result.append(ctx.actions.declare_file("combined.json"))
-    return result
+
+    combined_json = None
+    if len(ctx.attr.combined_json):
+        combined_json = ctx.actions.declare_file("combined.json")
+        result.append(combined_json)
+
+    return (result, combined_json)
 
 def _gather_transitive_sources(attr):
     result = []
@@ -106,13 +115,11 @@ def _run_solc(ctx):
     for v in ctx.attr.combined_json:
         if v not in _OUTPUT_COMPONENTS:
             fail("Illegal output component {}, must be one of {}".format(v, _OUTPUT_COMPONENTS))
-
-    has_combined_json = len(ctx.attr.combined_json) > 0
-    if has_combined_json:
+    if len(ctx.attr.combined_json):
         args.add("--combined-json")
         args.add_joined(ctx.attr.combined_json, join_with = ",")
 
-    outputs = _calculate_outs(ctx)
+    (outputs, combined_json) = _calculate_outs(ctx)
     if not len(outputs):
         fail("No outputs were requested. This is illegal under Bazel, as actions are only run to produce output files.")
 
@@ -139,9 +146,9 @@ def _run_solc(ctx):
         progress_message = "solc compile " + outputs[0].short_path,
     )
 
-    solc = solinfo.tool_files[0].basename
+    solc_bin = solinfo.tool_files[0].basename
 
-    solc_version = solc
+    solc_version = solc_bin
     prefixes = ["solc-"]
     prefixes.extend(TOOL_VERSIONS.keys())
     prefixes.append("-v")
@@ -156,8 +163,8 @@ def _run_solc(ctx):
         DefaultInfo(files = depset(outputs)),
         SolBinaryInfo(
             solc_version = solc_version,
-            solc_binary = solc,
-            combined_json = [f for f in outputs if f.basename == "combined.json"][0] if has_combined_json else None,
+            solc_bin = solc_bin,
+            combined_json = combined_json,
         ),
         remappings_info,
     ]
