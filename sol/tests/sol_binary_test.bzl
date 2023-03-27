@@ -5,8 +5,10 @@ See https://docs.bazel.build/versions/main/skylark/testing.html#for-testing-star
 load("@bazel_skylib//lib:unittest.bzl", "analysistest", "asserts", "unittest")
 load("@aspect_bazel_lib//lib:jq.bzl", "jq")
 load("@aspect_bazel_lib//lib:write_source_files.bzl", "write_source_files")
+load("//sol:defs.bzl", "sol_binary")
 load("//sol:providers.bzl", "SolBinaryInfo")
 load("//sol/private:versions.bzl", "TOOL_VERSIONS")
+load("//sol/private:utils.bzl", "normalize_version_string")
 
 def _smoke_test_impl(ctx):
     env = unittest.begin(ctx)
@@ -57,34 +59,45 @@ _solc_version_test = analysistest.make(
     },
 )
 
-def solc_version_test(name = "", target_under_test = "", **kwargs):
+def solc_version_test(version, name = ""):
     """Tests that a sol_binary correctly exposes the solc version.
 
     Args:
-      name: name of the test target
-      target_under_test: propagated to the skylib analysistest
-      **kwargs: propagated to the skylib analysistest
+      version: solc version to test.
+      name: ignored and only present to keep the linter happy; all names are derived from the version.
     """
-    INFO_ONLY = "_%s_sol_binary_info" % name
-    _extract_sol_binary_info(
-        name = INFO_ONLY,
-        binary = target_under_test,
+    norm_version = normalize_version_string(version)
+
+    BIN = "v%s" % norm_version
+    sol_binary(
+        name = BIN,
+        srcs = ["AnyVersion.sol"],
+        solc_version = version,
+    )
+    _solc_version_test(
+        name = "%s_test" % BIN,
+        target_under_test = BIN,
+        expected = version,
     )
 
-    JQ = "_%s_jq" % name
+    # While the scalar fields of SolBinaryInfo are easy to test with the above rule, confirming the version through the
+    # combined.json contents is simpler with jq + diff_test.
+
+    INFO_ONLY = "_%s_sol_binary_info" % BIN
+    _extract_sol_binary_info(
+        name = INFO_ONLY,
+        binary = BIN,
+    )
+    JQ = "_%s_jq" % BIN
     jq(
         name = JQ,
         srcs = [INFO_ONLY],
         filter_file = "combined_json.version.jq",
         args = ["--raw-output"],
     )
-    write_source_files(
-        name = "%s_combined_json_version" % name.removesuffix("_test"),
-        files = {"%s.version.txt" % name: JQ},
-    )
 
-    _solc_version_test(
-        name = name,
-        target_under_test = target_under_test,
-        **kwargs
+    write_source_files(
+        name = "%s_combined_json_version" % norm_version,
+        files = {"v%s.version.txt" % version: JQ},
+        diff_test = True,  # default value, but explicit for readability as this is the core of the test
     )

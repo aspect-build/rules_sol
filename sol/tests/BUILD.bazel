@@ -1,22 +1,8 @@
 load(":sol_binary_test.bzl", "sol_binary_test_suite", "solc_version_test")
-load("//sol:defs.bzl", "sol_binary")
-load("//sol/private:utils.bzl", ver_string = "normalize_version_string")
 
 sol_binary_test_suite(name = "sol_binary_test")
 
-SOLC_VERSIONS = [
+[solc_version_test(version = v) for v in [
     "0.7.6",
     "0.8.9",
-]
-
-[sol_binary(
-    name = "v%s" % ver_string(ver),
-    srcs = ["AnyVersion.sol"],
-    solc_version = ver,
-) for ver in SOLC_VERSIONS]
-
-[solc_version_test(
-    name = "v%s_test" % ver_string(ver),
-    expected = ver,
-    target_under_test = ":v%s" % ver_string(ver),
-) for ver in SOLC_VERSIONS]
+]]
