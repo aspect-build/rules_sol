@@ -75,7 +75,7 @@ def solc_version_test(name = "", target_under_test = "", **kwargs):
     jq(
         name = JQ,
         srcs = [INFO_ONLY],
-        filter_file = "jq_version_filter",
+        filter_file = "combined_json.version.jq",
         args = ["--raw-output"],
     )
     write_source_files(
