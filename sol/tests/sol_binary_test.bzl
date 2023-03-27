@@ -80,7 +80,7 @@ def solc_version_test(name = "", target_under_test = "", **kwargs):
     )
     write_source_files(
         name = "%s_combined_json_version" % name.removesuffix("_test"),
-        files = {"%s.version.json" % name: JQ},
+        files = {"%s.version.txt" % name: JQ},
     )
 
     _solc_version_test(
