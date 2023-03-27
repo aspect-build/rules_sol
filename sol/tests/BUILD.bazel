@@ -1,3 +1,8 @@
-load(":sol_binary_test.bzl", "sol_binary_test_suite")
+load(":sol_binary_test.bzl", "sol_binary_test_suite", "solc_version_test")
 
 sol_binary_test_suite(name = "sol_binary_test")
+
+[solc_version_test(version = v) for v in [
+    "0.7.6",
+    "0.8.9",
+]]

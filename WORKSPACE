@@ -25,6 +25,8 @@ rules_sol_dependencies()
     )
     for v in [
         LATEST_VERSION,
+        # If changing these, also change /private/tests/BUILD.bazel as the versions are used in explicit tests of
+        # compiler selection by sol_binary.solc_version.
         "0.8.9",
         "0.7.6",
     ]
@@ -57,6 +59,10 @@ npm_repositories()
 load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 
 bazel_skylib_workspace()
+
+load("@aspect_bazel_lib//lib:repositories.bzl", "register_jq_toolchains")
+
+register_jq_toolchains()
 
 ############################################
 # Gazelle, for generating bzl_library targets

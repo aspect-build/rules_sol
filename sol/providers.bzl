@@ -6,6 +6,15 @@ load(
     _sol_remappings_info = "sol_remappings_info",
 )
 
+SolBinaryInfo = provider(
+    doc = "Stores outputs of a sol_binary",
+    fields = {
+        "solc_version": "semver version of solc used",
+        "solc_bin": "full basename of solc binary used, including platform and commit ID",
+        "combined_json": "combined.json file produced by solc",
+    },
+)
+
 SolSourcesInfo = provider(
     doc = "Stores a tree of source file dependencies",
     fields = {
