@@ -98,6 +98,6 @@ def solc_version_test(version, name = ""):
 
     write_source_files(
         name = "%s_combined_json_version" % norm_version,
-        files = {"v%s.version.txt" % version: JQ},
+        files = {"v%s.test.txt" % version: JQ},
         diff_test = True,  # default value, but explicit for readability as this is the core of the test
     )
