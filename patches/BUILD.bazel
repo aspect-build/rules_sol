@@ -1,0 +1,18 @@
+exports_files(glob(["*.patch"]))
+
+test_suite(
+    name = "patched_tests",
+    tests = [
+        "@com_github_ethereum_go_ethereum//crypto/secp256k1:secp256k1_test",
+    ],
+)
+
+alias(
+    # TODO: Ideally we'd include this package's test in the above suite, but the
+    # GitHub Actions runner has issues with libusb. It's safe to assume that the
+    # upstream repo has passing tests and we simply need to prove that the patch
+    # allows the cgo build to succeed. Sample error:
+    # usb_test.go:58: thread 7, iter 0: failed to enumerate: failed to initialize libusb: libusb: unknown error [code -99]
+    name = "com_github_karalabe_usb",
+    actual = "@com_github_karalabe_usb//:usb",
+)

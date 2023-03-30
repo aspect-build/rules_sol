@@ -4,6 +4,7 @@ See <https://docs.soliditylang.org>
 """
 
 load("//sol/private:sol_binary.bzl", lib = "sol_binary")
+load("//sol/private:sol_go_library.bzl", _SOL_GO_LIBRARY_DEPS = "SOL_GO_LIBRARY_DEPS", go = "sol_go_library")
 load("//sol/private:sol_remappings.bzl", remap = "sol_remappings")
 load("//sol/private:sol_sources.bzl", src = "sol_sources")
 load(":providers.bzl", "SolBinaryInfo", "SolRemappingsInfo", "SolSourcesInfo")
@@ -32,3 +33,50 @@ sol_sources = rule(
     """,
     provides = [SolRemappingsInfo, SolSourcesInfo],
 )
+
+sol_go_library = rule(
+    implementation = go.implementation,
+    attrs = go.attrs,
+    doc = """Generate Solidity Go bindings using abigen. This target is embeddable in a go_library / go_binary.
+
+Note that Gazelle is unaware of sol_go_library(). The target must therefore be
+embedded with a #keep to avoid it being removed. If the embed is the only embed
+and no src is provided, then the embedding target's importpath must also be
+tagged with #keep.
+
+Example usage:
+```
+    sol_binary(
+        name = "nft_sol",
+        srcs = [
+            "MyNFT.sol",
+            "MyFancyStakingMechanism.sol",
+        ],
+        pkg = "nft",
+        deps = ["@openzeppelin-contracts_4-8-1"], # see sol_git_repository
+    )
+    sol_go_library(
+        name = "nft_sol_go",
+        binary = ":nft_sol",
+        pkg = "nft",
+    )
+    go_library(
+        name = "nft",
+        embed = [
+            ":nft_sol_go", #keep
+        ],
+        importpath = "github.com/org/repo/path/to/nft", #keep
+    )
+    go_test(
+        name = "nft_test",
+        embed = [
+            ":nft_sol", #keep
+            # and/or embed [":nft"] with #keep as necessary
+        ],
+    )
+```""",
+    provides = ["GoArchive", "GoLibrary", "GoSource"],
+    toolchains = go.toolchains,
+)
+
+SOL_GO_LIBRARY_DEPS = _SOL_GO_LIBRARY_DEPS

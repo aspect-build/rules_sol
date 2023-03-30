@@ -39,6 +39,7 @@ bzl_library(
     name = "providers",
     srcs = ["providers.bzl"],
     visibility = ["//visibility:public"],
+    deps = ["//sol/private:sol_remappings_info"],
 )
 
 bzl_library(

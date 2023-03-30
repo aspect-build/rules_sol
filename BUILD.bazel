@@ -1,13 +1,29 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
-load("@bazel_gazelle//:def.bzl", "gazelle", "gazelle_binary")
+load("@bazel_gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary")
+
+# gazelle:prefix github.com/aspect-build/rules_sol
 
 gazelle_binary(
     name = "gazelle_bin",
-    languages = ["@bazel_skylib//gazelle/bzl"],
+    languages = ["@bazel_skylib//gazelle/bzl"] + DEFAULT_LANGUAGES,
 )
 
 gazelle(
     name = "gazelle",
+    gazelle = "gazelle_bin",
+)
+
+gazelle(
+    # If this fails with "file name too long" it is unrelated to Go / Gazelle,
+    # and most likely due to being run on an ecryptfs filesystem. See
+    # https://github.com/golang/go/issues/58915.
+    name = "gazelle_update_go_ethereum_deps",
+    args = [
+        "-from_file=go.mod",
+        "-to_macro=go_ethereum_deps.bzl%go_ethereum_dependencies",
+        "-prune",
+    ],
+    command = "update-repos",
     gazelle = "gazelle_bin",
 )
 
@@ -19,4 +35,11 @@ bzl_library(
         "@bazel_tools//tools/build_defs/repo:http.bzl",
         "@bazel_tools//tools/build_defs/repo:utils.bzl",
     ],
+)
+
+bzl_library(
+    name = "go_ethereum_deps",
+    srcs = ["go_ethereum_deps.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["@bazel_gazelle//:deps"],
 )

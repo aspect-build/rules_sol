@@ -1,0 +1,44 @@
+The secp256k1 Go package is compiled with cgo but Gazelle doesn't add the
+correct cdeps. First the libsecp256k1 source and header files are exposed as a
+target and then the Go package is modified to depend on it.
+
+The change in copts accounts for the different working directory when compiling
+as an external repository, which results in the entire go-ethereum repo being
+moved into a sub-directory of the Bazel execution root.
+
+The libsecp256k1 .c files are deliberately added to the hdrs labels instead of
+the typical srcs. This makes them available to cgo but doesn't attempt to
+compile them as would be the case if they were srcs. Compilation is left to cgo
+as direct compilation of the cc_library would require @rules_foreign_cc's
+configure_make.
+
+--- crypto/secp256k1/libsecp256k1/BUILD.bazel
+--- crypto/secp256k1/libsecp256k1/BUILD.bazel
+@@ -0,0 +1,8 @@
++cc_library(
++    name = "libsecp256k1",
++    hdrs = glob([
++        "**/*.c",
++        "**/*.h",
++    ]),
++    visibility = ["//crypto/secp256k1:__pkg__"],
++)
+
++++ crypto/secp256k1/BUILD.bazel
+--- crypto/secp256k1/BUILD.bazel
+@@ -10,10 +10,13 @@
+         "scalar_mult_nocgo.go",
+         "secp256.go",
+     ],
++    cdeps = [
++        "//crypto/secp256k1/libsecp256k1",
++    ],
+     cgo = True,
+     copts = [
+-        "-Icrypto/secp256k1/libsecp256k1",
+-        "-Icrypto/secp256k1/libsecp256k1/src",
++        "-Iexternal/com_github_ethereum_go_ethereum/crypto/secp256k1/libsecp256k1",
++        "-Iexternal/com_github_ethereum_go_ethereum/crypto/secp256k1/libsecp256k1/src",
+     ],
+     importpath = "github.com/ethereum/go-ethereum/crypto/secp256k1",
+     visibility = ["//visibility:public"],

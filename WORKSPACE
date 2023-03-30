@@ -65,12 +65,35 @@ load("@aspect_bazel_lib//lib:repositories.bzl", "register_jq_toolchains")
 register_jq_toolchains()
 
 ############################################
-# Gazelle, for generating bzl_library targets
+# Gazelle, for generating bzl_library targets and updating go-ethereum deps.
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
+
+# gazelle:repo bazel_gazelle
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
 
 go_rules_dependencies()
 
-go_register_toolchains(version = "1.17.2")
+go_register_toolchains(version = "1.19.5")
+
+load("//:go_ethereum_deps.bzl", "go_ethereum_dependencies")
+
+# gazelle:repository_macro go_ethereum_deps.bzl%go_ethereum_dependencies
+go_ethereum_dependencies()
 
 gazelle_dependencies()
+
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "com_google_protobuf",
+    sha256 = "d0f5f605d0d656007ce6c8b5a82df3037e1d8fe8b121ed42e536f569dec16113",
+    strip_prefix = "protobuf-3.14.0",
+    urls = [
+        "https://mirror.bazel.build/github.com/protocolbuffers/protobuf/archive/v3.14.0.tar.gz",
+        "https://github.com/protocolbuffers/protobuf/archive/v3.14.0.tar.gz",
+    ],
+)
+
+load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
+
+protobuf_deps()
