@@ -8,6 +8,7 @@ load("//sol/private:sol_go_library.bzl", _SOL_GO_LIBRARY_DEPS = "SOL_GO_LIBRARY_
 load("//sol/private:sol_remappings.bzl", remap = "sol_remappings")
 load("//sol/private:sol_sources.bzl", src = "sol_sources")
 load(":providers.bzl", "SolBinaryInfo", "SolRemappingsInfo", "SolSourcesInfo")
+load("@io_bazel_rules_go//go:def.bzl", "GoArchive", "GoLibrary", "GoSource")
 
 sol_binary = rule(
     implementation = lib.implementation,
@@ -75,7 +76,7 @@ Example usage:
         ],
     )
 ```""",
-    provides = ["GoArchive", "GoLibrary", "GoSource"],
+    provides = [GoArchive, GoLibrary, GoSource],
     toolchains = go.toolchains,
 )
 

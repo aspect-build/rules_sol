@@ -114,8 +114,8 @@ def go_ethereum_dependencies():
     )
     go_repository(
         name = "com_github_cockroachdb_errors",
-        importpath = "github.com/cockroachdb/errors",
         build_file_proto_mode = "disable",
+        importpath = "github.com/cockroachdb/errors",
         sum = "h1:yFVvsI0VxmRShfawbt/laCIDy/mtTqqnvoNgiy5bEV8=",
         version = "v1.9.1",
     )
@@ -705,6 +705,7 @@ def go_ethereum_dependencies():
         sum = "h1:g6Z6vPFA9dYBAF7DWcH6sCcOntplXsDKcliusYijMlw=",
         version = "v0.1.0",
     )
+
     go_repository(
         name = "org_golang_x_text",
         importpath = "golang.org/x/text",

@@ -30,6 +30,64 @@ sol_binary compiles Solidity source files with solc
 | <a id="sol_binary-srcs"></a>srcs |  Solidity source files   | <a href="https://bazel.build/concepts/labels">List of labels</a> | required |  |
 
 
+<a id="sol_go_library"></a>
+
+## sol_go_library
+
+<pre>
+sol_go_library(<a href="#sol_go_library-name">name</a>, <a href="#sol_go_library-binary">binary</a>, <a href="#sol_go_library-deps">deps</a>, <a href="#sol_go_library-pkg">pkg</a>)
+</pre>
+
+Generate Solidity Go bindings using abigen. This target is embeddable in a go_library / go_binary.
+
+Note that Gazelle is unaware of sol_go_library(). The target must therefore be
+embedded with a #keep to avoid it being removed. If the embed is the only embed
+and no src is provided, then the embedding target's importpath must also be
+tagged with #keep.
+
+Example usage:
+```
+    sol_binary(
+        name = "nft_sol",
+        srcs = [
+            "MyNFT.sol",
+            "MyFancyStakingMechanism.sol",
+        ],
+        pkg = "nft",
+        deps = ["@openzeppelin-contracts_4-8-1"], # see sol_git_repository
+    )
+    sol_go_library(
+        name = "nft_sol_go",
+        binary = ":nft_sol",
+        pkg = "nft",
+    )
+    go_library(
+        name = "nft",
+        embed = [
+            ":nft_sol_go", #keep
+        ],
+        importpath = "github.com/org/repo/path/to/nft", #keep
+    )
+    go_test(
+        name = "nft_test",
+        embed = [
+            ":nft_sol", #keep
+            # and/or embed [":nft"] with #keep as necessary
+        ],
+    )
+```
+
+**ATTRIBUTES**
+
+
+| Name  | Description | Type | Mandatory | Default |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="sol_go_library-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="sol_go_library-binary"></a>binary |  The sol_binary target producing a combined.json for which <code>abigen</code> bindings are to be generated.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
+| <a id="sol_go_library-deps"></a>deps |  -   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | ["@com_github_ethereum_go_ethereum//:go-ethereum", "@com_github_ethereum_go_ethereum//accounts/abi", "@com_github_ethereum_go_ethereum//accounts/abi/bind", "@com_github_ethereum_go_ethereum//common", "@com_github_ethereum_go_ethereum//core/types", "@com_github_ethereum_go_ethereum//event"] |
+| <a id="sol_go_library-pkg"></a>pkg |  Propagated to abigen --pkg   | String | required |  |
+
+
 <a id="sol_remappings"></a>
 
 ## sol_remappings

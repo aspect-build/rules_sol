@@ -1,0 +1,25 @@
+load("//sol:defs.bzl", "sol_binary", "sol_go_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_test")
+
+sol_binary(
+    name = "echo_sol",
+    srcs = ["Echo.sol"],
+)
+
+sol_go_library(
+    name = "echo_sol_go",
+    binary = ":echo_sol",
+    pkg = "golangbindings",
+)
+
+go_test(
+    name = "golangbindings_test",
+    srcs = ["bindings_test.go"],
+    embed = [":echo_sol_go"],  # keep
+    deps = [
+        "@com_github_ethereum_go_ethereum//accounts/abi/bind",
+        "@com_github_ethereum_go_ethereum//accounts/abi/bind/backends",
+        "@com_github_ethereum_go_ethereum//core",
+        "@com_github_ethereum_go_ethereum//crypto",
+    ],
+)
