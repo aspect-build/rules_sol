@@ -3,6 +3,7 @@ exports_files(glob(["*.patch"]))
 test_suite(
     name = "patched_tests",
     tests = [
+        "@com_github_datadog_zstd//:zstd_test",
         "@com_github_ethereum_go_ethereum//crypto/secp256k1:secp256k1_test",
     ],
 )
