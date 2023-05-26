@@ -60,7 +60,7 @@ _solc_version_test = analysistest.make(
 )
 
 def write_from_combined_json(target_suffix, sol_binary, jq_filter_file, out, name = ""):
-    """Extracts part of a combined.json using jq and writes it to the source tree with diff_test.
+    """Extracts part of a combined.json using jq and writes it to the source tree, including a diff_test.
 
     Args:
       target_suffix: a descriptive suffix to be appended to the write_source_files() target name.
@@ -119,7 +119,9 @@ def solc_version_test(version, name = ""):
         out = "v%s.test.txt" % version,
     )
 
-def solc_optimizer_test(optimize, optimize_runs = 200, name = ""):
+def solc_optimizer_test(optimize, optimize_runs = 200, name = "", **kwargs):
+    """Tests that a sol_binary correctly propagates optimizer flags."""
+
     BIN = "optimize_%d" % optimize_runs if optimize else "no_optimize"
     sol_binary(
         name = BIN,
@@ -127,6 +129,7 @@ def solc_optimizer_test(optimize, optimize_runs = 200, name = ""):
         optimize = optimize,
         optimize_runs = optimize_runs,
         combined_json = ["metadata"],
+        **kwargs
     )
 
     write_from_combined_json(

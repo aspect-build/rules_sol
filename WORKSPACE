@@ -28,6 +28,9 @@ rules_sol_dependencies()
         # If changing these, also change /private/tests/BUILD.bazel as the versions are used in explicit tests of
         # compiler selection by sol_binary.solc_version.
         "0.8.9",
+        "0.8.10",
+        "0.8.11",
+        "0.8.12",
         "0.7.6",
     ]
 ]
