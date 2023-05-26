@@ -1,4 +1,4 @@
-load(":sol_binary_test.bzl", "sol_binary_test_suite", "solc_version_test")
+load(":sol_binary_test.bzl", "sol_binary_test_suite", "solc_optimizer_test", "solc_version_test")
 
 sol_binary_test_suite(name = "sol_binary_test")
 
@@ -6,3 +6,17 @@ sol_binary_test_suite(name = "sol_binary_test")
     "0.7.6",
     "0.8.9",
 ]]
+
+solc_optimizer_test(
+    optimize = True,
+    optimize_runs = 200,
+)
+
+solc_optimizer_test(
+    optimize = True,
+    optimize_runs = 300,
+)
+
+solc_optimizer_test(
+    optimize = False,
+)

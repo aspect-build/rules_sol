@@ -41,6 +41,13 @@ _ATTRS = {
     "_allowlist_function_transition": attr.label(
         default = "@bazel_tools//tools/allowlists/function_transition_allowlist",
     ),
+    "optimize": attr.bool(
+        doc = "Set the solc --optimize flag.",
+    ),
+    "optimize_runs": attr.int(
+        doc = "Set the solc --optimize-runs flag.",
+        default = 200,  # same as solc
+    ),
 }
 
 def _calculate_outs(ctx):
@@ -76,6 +83,10 @@ def _run_solc(ctx):
     "Generate action(s) to run the compiler"
     solinfo = ctx.toolchains["@aspect_rules_sol//sol:toolchain_type"].solinfo
     args = ctx.actions.args()
+
+    for arg in ctx.attr.args:
+        if arg in ["--optimize", "--optimize_runs"]:
+            fail("{} in args list; use the sol_binary attribute instead", arg)
 
     # User-provided arguments first, so we can override them
     args.add_all(ctx.attr.args)
@@ -118,6 +129,9 @@ def _run_solc(ctx):
     if len(ctx.attr.combined_json):
         args.add("--combined-json")
         args.add_joined(ctx.attr.combined_json, join_with = ",")
+
+    if ctx.attr.optimize:
+        args.add_all(["--optimize", "--optimize-runs", ctx.attr.optimize_runs])
 
     (outputs, combined_json) = _calculate_outs(ctx)
     if not len(outputs):
