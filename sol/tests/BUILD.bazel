@@ -7,25 +7,14 @@ sol_binary_test_suite(name = "sol_binary_test")
     "0.8.9",
 ]]
 
-# The solc_version used in solc_optimizer_test()s are of no importance to the
-# tests themselves and simply act as a workaround to allow for multiple
-# sol_binary() targets pending a fix for https://github.com/aspect-build/rules_sol/issues/12.
-# The transition used for selecting the version negates the limitation if
-# different versions are used  ¯\_(ツ)_/¯
-
-solc_optimizer_test(
+[solc_optimizer_test(
     optimize = True,
-    optimize_runs = 42,
-    solc_version = "0.8.10",
-)
-
-solc_optimizer_test(
-    optimize = True,
-    optimize_runs = 1337,
-    solc_version = "0.8.11",
-)
+    optimize_runs = runs,
+) for runs in [
+    42,
+    1337,
+]]
 
 solc_optimizer_test(
     optimize = False,
-    solc_version = "0.8.12",
 )
