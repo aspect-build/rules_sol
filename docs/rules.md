@@ -27,8 +27,8 @@ sol_binary compiles Solidity source files with solc
 | <a id="sol_binary-bin"></a>bin |  Whether to emit binary of the contracts in hex.   | Boolean | optional | False |
 | <a id="sol_binary-combined_json"></a>combined_json |  Output a single json document containing the specified information.   | List of strings | optional | ["abi", "bin", "hashes"] |
 | <a id="sol_binary-deps"></a>deps |  Solidity libraries, either first-party sol_sources, or third-party distributed as packages on npm   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | [] |
-| <a id="sol_binary-optimize"></a>optimize |  Set the solc --optimize flag.   | Boolean | optional | False |
-| <a id="sol_binary-optimize_runs"></a>optimize_runs |  Set the solc --optimize-runs flag.   | Integer | optional | 200 |
+| <a id="sol_binary-optimize"></a>optimize |  Set the solc --optimize flag.<br><br>        See https://docs.soliditylang.org/en/latest/using-the-compiler.html#optimizer-options   | Boolean | optional | False |
+| <a id="sol_binary-optimize_runs"></a>optimize_runs |  Set the solc --optimize-runs flag.<br><br>        See https://docs.soliditylang.org/en/latest/using-the-compiler.html#optimizer-options   | Integer | optional | 200 |
 | <a id="sol_binary-solc_version"></a>solc_version |  -   | String | optional | "" |
 | <a id="sol_binary-srcs"></a>srcs |  Solidity source files   | <a href="https://bazel.build/concepts/labels">List of labels</a> | required |  |
 

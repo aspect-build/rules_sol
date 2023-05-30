@@ -42,10 +42,16 @@ _ATTRS = {
         default = "@bazel_tools//tools/allowlists/function_transition_allowlist",
     ),
     "optimize": attr.bool(
-        doc = "Set the solc --optimize flag.",
+        doc = """Set the solc --optimize flag.
+
+        See https://docs.soliditylang.org/en/latest/using-the-compiler.html#optimizer-options
+        """,
     ),
     "optimize_runs": attr.int(
-        doc = "Set the solc --optimize-runs flag.",
+        doc = """Set the solc --optimize-runs flag. In keeping with solc behaviour, this has no effect unless optimize=True.
+        
+        See https://docs.soliditylang.org/en/latest/using-the-compiler.html#optimizer-options
+        """,
         default = 200,  # same as solc
     ),
 }

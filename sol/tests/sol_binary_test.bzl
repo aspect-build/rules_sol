@@ -83,6 +83,7 @@ def write_from_combined_json(target_suffix, sol_binary, jq_filter_file, out, nam
         args = ["--raw-output"],
     )
 
+    # TODO: convert to assert_json_matches pending https://github.com/aspect-build/bazel-lib/issues/444
     write_source_files(
         name = "combined_json_%s" % target_suffix,
         files = {out: JQ},
