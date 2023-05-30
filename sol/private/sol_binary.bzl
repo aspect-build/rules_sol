@@ -10,7 +10,6 @@ load("@bazel_skylib//lib:versions.bzl", "versions")
 load("@aspect_rules_js//js:providers.bzl", "JsInfo")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
 load("//sol:providers.bzl", "SolBinaryInfo", "SolRemappingsInfo", "SolSourcesInfo", "sol_remappings_info")
-load("//sol/private:versions.bzl", "TOOL_VERSIONS")
 
 _OUTPUT_COMPONENTS = ["abi", "asm", "ast", "bin", "bin-runtime", "devdoc", "function-debug", "function-debug-runtime", "generated-sources", "generated-sources-runtime", "hashes", "metadata", "opcodes", "srcmap", "srcmap-runtime", "storage-layout", "userdoc"]
 _ATTRS = {
@@ -94,25 +93,6 @@ def _gather_transitive_sources(attr):
             result.append(dep[SolSourcesInfo].transitive_sources)
     return result
 
-def _solc_meta(ctx):
-    """Returns the solc binary and parsed version."""
-    solinfo = ctx.toolchains["@aspect_rules_sol//sol:toolchain_type"].solinfo
-
-    solc_bin = solinfo.tool_files[0].basename
-
-    solc_version = solc_bin
-    prefixes = ["solc-"]
-    prefixes.extend(TOOL_VERSIONS.keys())
-    prefixes.append("-v")
-    for p in prefixes:
-        solc_version = solc_version.removeprefix(p)
-    commit_pos = solc_version.find("+commit")
-    if commit_pos == -1:
-        fail("no solc commit found")
-    solc_version = solc_version[:commit_pos]
-
-    return (solc_bin, solc_version)
-
 def _run_solc(ctx):
     "Generate action(s) to run the compiler"
     solinfo = ctx.toolchains["@aspect_rules_sol//sol:toolchain_type"].solinfo
@@ -166,11 +146,9 @@ def _run_solc(ctx):
     if ctx.attr.optimize:
         args.add_all(["--optimize", "--optimize-runs", ctx.attr.optimize_runs])
 
-    (solc_bin, solc_version) = _solc_meta(ctx)
-
     if ctx.attr.no_cbor_metadata:
-        if not versions.is_at_least("0.8.18", solc_version):
-            fail("solc version %s doesn't support --no-cbor-metadata" % solc_version)
+        if not versions.is_at_least("0.8.18", solinfo.solc_version):
+            fail("solc version %s doesn't support --no-cbor-metadata" % solinfo.solc_version)
         args.add("--no-cbor-metadata")
 
     (outputs, combined_json) = _calculate_outs(ctx)
@@ -203,8 +181,8 @@ def _run_solc(ctx):
     return [
         DefaultInfo(files = depset(outputs)),
         SolBinaryInfo(
-            solc_version = solc_version,
-            solc_bin = solc_bin,
+            solc_version = solinfo.solc_version,
+            solc_bin = solinfo.tool_files[0].basename,
             combined_json = combined_json,
         ),
         remappings_info,
