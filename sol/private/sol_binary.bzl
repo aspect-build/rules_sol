@@ -9,6 +9,7 @@ load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@aspect_rules_js//js:providers.bzl", "JsInfo")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
 load("//sol:providers.bzl", "SolBinaryInfo", "SolRemappingsInfo", "SolSourcesInfo", "sol_remappings_info")
+load("//sol/private:utils.bzl", "semver_cmp")
 load("//sol/private:versions.bzl", "TOOL_VERSIONS")
 
 _OUTPUT_COMPONENTS = ["abi", "asm", "ast", "bin", "bin-runtime", "devdoc", "function-debug", "function-debug-runtime", "generated-sources", "generated-sources-runtime", "hashes", "metadata", "opcodes", "srcmap", "srcmap-runtime", "storage-layout", "userdoc"]
@@ -54,6 +55,12 @@ _ATTRS = {
         """,
         default = 200,  # same as solc
     ),
+    "no_cbor_metadata": attr.bool(
+        doc = """Set the solc --no-cbor-metadata flag.
+
+If false, compiled bytecode may not be deterministic due to appended metadata. This can change due to input that has no effect on compiled output; e.g. remappings, variable names, and comments.""",
+        default = True,
+    ),
 }
 
 def _calculate_outs(ctx):
@@ -87,13 +94,32 @@ def _gather_transitive_sources(attr):
             result.append(dep[SolSourcesInfo].transitive_sources)
     return result
 
+def _solc_meta(ctx):
+    """Returns the solc binary and parsed version."""
+    solinfo = ctx.toolchains["@aspect_rules_sol//sol:toolchain_type"].solinfo
+
+    solc_bin = solinfo.tool_files[0].basename
+
+    solc_version = solc_bin
+    prefixes = ["solc-"]
+    prefixes.extend(TOOL_VERSIONS.keys())
+    prefixes.append("-v")
+    for p in prefixes:
+        solc_version = solc_version.removeprefix(p)
+    commit_pos = solc_version.find("+commit")
+    if commit_pos == -1:
+        fail("no solc commit found")
+    solc_version = solc_version[:commit_pos]
+
+    return (solc_bin, solc_version)
+
 def _run_solc(ctx):
     "Generate action(s) to run the compiler"
     solinfo = ctx.toolchains["@aspect_rules_sol//sol:toolchain_type"].solinfo
     args = ctx.actions.args()
 
     for arg in ctx.attr.args:
-        if arg in ["--optimize", "--optimize_runs"]:
+        if arg in ["--optimize", "--optimize_runs", "--no-cbor-metadata"]:
             fail("{} in args list; use the sol_binary attribute instead", arg)
 
     # User-provided arguments first, so we can override them
@@ -137,9 +163,15 @@ def _run_solc(ctx):
     if len(ctx.attr.combined_json):
         args.add("--combined-json")
         args.add_joined(ctx.attr.combined_json, join_with = ",")
-
     if ctx.attr.optimize:
         args.add_all(["--optimize", "--optimize-runs", ctx.attr.optimize_runs])
+
+    (solc_bin, solc_version) = _solc_meta(ctx)
+
+    if ctx.attr.no_cbor_metadata:
+        if semver_cmp(solc_version, "0.8.18") == -1:
+            fail("solc version %s doesn't support --no-cbor-metadata" % solc_version)
+        args.add("--no-cbor-metadata")
 
     (outputs, combined_json) = _calculate_outs(ctx)
     if not len(outputs):
@@ -167,19 +199,6 @@ def _run_solc(ctx):
         mnemonic = "Solc",
         progress_message = "solc compile " + outputs[0].short_path,
     )
-
-    solc_bin = solinfo.tool_files[0].basename
-
-    solc_version = solc_bin
-    prefixes = ["solc-"]
-    prefixes.extend(TOOL_VERSIONS.keys())
-    prefixes.append("-v")
-    for p in prefixes:
-        solc_version = solc_version.removeprefix(p)
-    commit_pos = solc_version.find("+commit")
-    if commit_pos == -1:
-        fail("no solc commit found")
-    solc_version = solc_version[:commit_pos]
 
     return [
         DefaultInfo(files = depset(outputs)),
