@@ -104,6 +104,7 @@ def solc_version_test(version, name = ""):
         name = BIN,
         srcs = ["AnyVersion.sol"],
         solc_version = version,
+        no_cbor_metadata = False,
     )
     _solc_version_test(
         name = "%s_test" % BIN,
@@ -137,5 +138,22 @@ def solc_optimizer_test(optimize, optimize_runs = 200, name = "", **kwargs):
         target_suffix = BIN,
         sol_binary = BIN,
         jq_filter_file = "optimizer.jq",
+        out = "%s.test.txt" % BIN,
+    )
+
+def solc_no_metdata_test(no_cbor_metadata, name = ""):
+    BIN = "%s_cbor_metadata" % ("no" if no_cbor_metadata else "with")
+    sol_binary(
+        name = BIN,
+        srcs = ["AnyVersion.sol"],
+        combined_json = ["metadata"],
+        solc_version = "0.8.18",  # minimum version supporting the flag
+        no_cbor_metadata = no_cbor_metadata,
+    )
+
+    write_from_combined_json(
+        target_suffix = BIN,
+        sol_binary = BIN,
+        jq_filter_file = "settings-metadata.jq",
         out = "%s.test.txt" % BIN,
     )

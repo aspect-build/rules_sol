@@ -1,6 +1,8 @@
 """This module implements the language-specific toolchain rule.
 """
 
+load("//sol/private:versions.bzl", "TOOL_VERSIONS")
+
 SolInfo = provider(
     doc = "Information about how to invoke the tool executable.",
     fields = {
@@ -8,6 +10,7 @@ SolInfo = provider(
         "tool_files": """Files required in runfiles to make the tool executable available.
 
 May be empty if the target_tool_path points to a locally installed tool binary.""",
+        "solc_version": "Semantic version of the solc binary referenced by `target_tool_path`.",
     },
 )
 
@@ -18,6 +21,22 @@ def _to_manifest_path(ctx, file):
     else:
         return ctx.workspace_name + "/" + file.short_path
 
+def _parse_solc_version(solc_bin_file):
+    """Parses and returns a semantic version string from solc_bin_file.basename."""
+    prefixes = ["solc-"]
+    prefixes.extend(TOOL_VERSIONS.keys())
+    prefixes.append("-v")
+
+    solc_version = solc_bin_file.basename
+    for p in prefixes:
+        solc_version = solc_version.removeprefix(p)
+
+    commit_pos = solc_version.find("+commit")
+    if commit_pos == -1:
+        fail("no solc commit found")
+
+    return solc_version[:commit_pos]
+
 def _sol_toolchain_impl(ctx):
     if ctx.attr.target_tool and ctx.attr.target_tool_path:
         fail("Can only set one of target_tool or target_tool_path but both were set.")
@@ -26,10 +45,12 @@ def _sol_toolchain_impl(ctx):
 
     tool_files = []
     target_tool_path = ctx.attr.target_tool_path
+    solc_version = None
 
     if ctx.attr.target_tool:
         tool_files = ctx.attr.target_tool.files.to_list()
         target_tool_path = _to_manifest_path(ctx, tool_files[0])
+        solc_version = _parse_solc_version(tool_files[0])
 
     # Make the $(SOLC_BIN) variable available in places like genrules.
     # See https://docs.bazel.build/versions/main/be/make-variables.html#custom_variables
@@ -43,6 +64,7 @@ def _sol_toolchain_impl(ctx):
     solinfo = SolInfo(
         target_tool_path = target_tool_path,
         tool_files = tool_files,
+        solc_version = solc_version,
     )
 
     # Export all the providers inside our ToolchainInfo
