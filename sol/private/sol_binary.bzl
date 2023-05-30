@@ -6,10 +6,10 @@ TODO:
 """
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
+load("@bazel_skylib//lib:versions.bzl", "versions")
 load("@aspect_rules_js//js:providers.bzl", "JsInfo")
 load("@aspect_rules_js//js:libs.bzl", "js_lib_helpers")
 load("//sol:providers.bzl", "SolBinaryInfo", "SolRemappingsInfo", "SolSourcesInfo", "sol_remappings_info")
-load("//sol/private:utils.bzl", "semver_cmp")
 load("//sol/private:versions.bzl", "TOOL_VERSIONS")
 
 _OUTPUT_COMPONENTS = ["abi", "asm", "ast", "bin", "bin-runtime", "devdoc", "function-debug", "function-debug-runtime", "generated-sources", "generated-sources-runtime", "hashes", "metadata", "opcodes", "srcmap", "srcmap-runtime", "storage-layout", "userdoc"]
@@ -169,7 +169,7 @@ def _run_solc(ctx):
     (solc_bin, solc_version) = _solc_meta(ctx)
 
     if ctx.attr.no_cbor_metadata:
-        if semver_cmp(solc_version, "0.8.18") == -1:
+        if not versions.is_at_least("0.8.18", solc_version):
             fail("solc version %s doesn't support --no-cbor-metadata" % solc_version)
         args.add("--no-cbor-metadata")
 
