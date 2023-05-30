@@ -41,6 +41,19 @@ _ATTRS = {
     "_allowlist_function_transition": attr.label(
         default = "@bazel_tools//tools/allowlists/function_transition_allowlist",
     ),
+    "optimize": attr.bool(
+        doc = """Set the solc --optimize flag.
+
+        See https://docs.soliditylang.org/en/latest/using-the-compiler.html#optimizer-options
+        """,
+    ),
+    "optimize_runs": attr.int(
+        doc = """Set the solc --optimize-runs flag. In keeping with solc behaviour, this has no effect unless optimize=True.
+        
+        See https://docs.soliditylang.org/en/latest/using-the-compiler.html#optimizer-options
+        """,
+        default = 200,  # same as solc
+    ),
 }
 
 def _calculate_outs(ctx):
@@ -48,19 +61,21 @@ def _calculate_outs(ctx):
 
     Returns: a tuple of (a) a list of the predicted files; and (b) the combined.json
     file if it is to be emitted, otherwise None. If (b) is not None then it is the
-    same file included in the list.
+    same file included in the list. All files are in a sub-directory named the same
+    as ctx.attr.name.
     """
     result = []
+    prefix = ctx.attr.name + "/"
     for src in ctx.files.srcs:
         relative_src = paths.relativize(src.short_path, ctx.label.package)
         if ctx.attr.bin:
-            result.append(ctx.actions.declare_file(paths.replace_extension(relative_src, ".bin")))
+            result.append(ctx.actions.declare_file(prefix + paths.replace_extension(relative_src, ".bin")))
         if ctx.attr.ast_compact_json:
-            result.append(ctx.actions.declare_file(relative_src + "_json.ast"))
+            result.append(ctx.actions.declare_file(prefix + relative_src + "_json.ast"))
 
     combined_json = None
     if len(ctx.attr.combined_json):
-        combined_json = ctx.actions.declare_file("combined.json")
+        combined_json = ctx.actions.declare_file(prefix + "combined.json")
         result.append(combined_json)
 
     return (result, combined_json)
@@ -77,6 +92,10 @@ def _run_solc(ctx):
     solinfo = ctx.toolchains["@aspect_rules_sol//sol:toolchain_type"].solinfo
     args = ctx.actions.args()
 
+    for arg in ctx.attr.args:
+        if arg in ["--optimize", "--optimize_runs"]:
+            fail("{} in args list; use the sol_binary attribute instead", arg)
+
     # User-provided arguments first, so we can override them
     args.add_all(ctx.attr.args)
 
@@ -86,7 +105,7 @@ def _run_solc(ctx):
     args.add_all(["--base-path", "."])
 
     args.add("--output-dir")
-    args.add_joined([ctx.bin_dir.path, ctx.label.package], join_with = "/")
+    args.add_joined([ctx.bin_dir.path, ctx.label.package, ctx.attr.name], join_with = "/")
 
     root_packages = []
     for dep in ctx.attr.deps:
@@ -118,6 +137,9 @@ def _run_solc(ctx):
     if len(ctx.attr.combined_json):
         args.add("--combined-json")
         args.add_joined(ctx.attr.combined_json, join_with = ",")
+
+    if ctx.attr.optimize:
+        args.add_all(["--optimize", "--optimize-runs", ctx.attr.optimize_runs])
 
     (outputs, combined_json) = _calculate_outs(ctx)
     if not len(outputs):

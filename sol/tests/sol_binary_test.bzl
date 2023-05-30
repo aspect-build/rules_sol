@@ -59,6 +59,37 @@ _solc_version_test = analysistest.make(
     },
 )
 
+def write_from_combined_json(target_suffix, sol_binary, jq_filter_file, out, name = ""):
+    """Extracts part of a combined.json using jq and writes it to the source tree, including a diff_test.
+
+    Args:
+      target_suffix: a descriptive suffix to be appended to the write_source_files() target name.
+      sol_binary: the sol_binary() target from which the combined.json is sourced.
+      jq_filter_file: propagated to the jq target that extracts from combined.json.
+      out: output file to which the jq output is written and against which a diff_test is created.
+      name: ignored and only present to keep the linter happy; all names are derived from the version.
+    """
+
+    INFO_ONLY = "_%s_sol_binary_info" % sol_binary
+    _extract_sol_binary_info(
+        name = INFO_ONLY,
+        binary = sol_binary,
+    )
+    JQ = "_%s_jq" % sol_binary
+    jq(
+        name = JQ,
+        srcs = [INFO_ONLY],
+        filter_file = jq_filter_file,
+        args = ["--raw-output"],
+    )
+
+    # TODO: convert to assert_json_matches pending https://github.com/aspect-build/bazel-lib/issues/444
+    write_source_files(
+        name = "combined_json_%s" % target_suffix,
+        files = {out: JQ},
+        diff_test = True,  # default value, but explicit for readability as this is the core of the test
+    )
+
 def solc_version_test(version, name = ""):
     """Tests that a sol_binary correctly exposes the solc version.
 
@@ -82,22 +113,29 @@ def solc_version_test(version, name = ""):
 
     # While the scalar fields of SolBinaryInfo are easy to test with the above rule, confirming the version through the
     # combined.json contents is simpler with jq + diff_test.
-
-    INFO_ONLY = "_%s_sol_binary_info" % BIN
-    _extract_sol_binary_info(
-        name = INFO_ONLY,
-        binary = BIN,
-    )
-    JQ = "_%s_jq" % BIN
-    jq(
-        name = JQ,
-        srcs = [INFO_ONLY],
-        filter_file = "combined_json.version.jq",
-        args = ["--raw-output"],
+    write_from_combined_json(
+        target_suffix = "version_%s" % norm_version,
+        sol_binary = BIN,
+        jq_filter_file = "combined_json.version.jq",
+        out = "v%s.test.txt" % version,
     )
 
-    write_source_files(
-        name = "%s_combined_json_version" % norm_version,
-        files = {"v%s.test.txt" % version: JQ},
-        diff_test = True,  # default value, but explicit for readability as this is the core of the test
+def solc_optimizer_test(optimize, optimize_runs = 200, name = "", **kwargs):
+    """Tests that a sol_binary correctly propagates optimizer flags."""
+
+    BIN = "optimize_%d" % optimize_runs if optimize else "no_optimize"
+    sol_binary(
+        name = BIN,
+        srcs = ["AnyVersion.sol"],
+        optimize = optimize,
+        optimize_runs = optimize_runs,
+        combined_json = ["metadata"],
+        **kwargs
+    )
+
+    write_from_combined_json(
+        target_suffix = BIN,
+        sol_binary = BIN,
+        jq_filter_file = "optimizer.jq",
+        out = "%s.test.txt" % BIN,
     )
